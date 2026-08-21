@@ -15,6 +15,9 @@ The first desktop prototype is a native Windows application built with C#, WPF a
 - persistent DNS suffix management for environment discovery;
 - a bounded IPv4 range scanner with live-host results;
 - an application update settings panel;
+- English as the default interface language with complete French localization;
+- persistent language selection in Settings;
+- workstation targeting by hostname or IP address;
 - a custom resizable window with native minimize, maximize and close actions.
 
 ## Run locally

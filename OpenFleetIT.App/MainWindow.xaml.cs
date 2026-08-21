@@ -13,18 +13,20 @@ public partial class MainWindow : Window
 {
     private readonly ObservableCollection<ApplicationItem> _applications =
     [
-        new("Microsoft 365 Apps", "Microsoft Corporation", "16.0.19127.20264", "À jour", "#2457D7A3", "#FF57D7A3"),
-        new("Google Chrome", "Google LLC", "140.0.7339.81", "Mise à jour", "#24FFBC66", "#FFFFBC66"),
-        new("7-Zip", "Igor Pavlov", "24.09", "À jour", "#2457D7A3", "#FF57D7A3"),
-        new("VLC media player", "VideoLAN", "3.0.21", "Réparation", "#248B7CFF", "#FFA99CFF"),
-        new("Microsoft Teams", "Microsoft Corporation", "25193.1707.3773.5286", "À jour", "#2457D7A3", "#FF57D7A3"),
-        new("Adobe Acrobat Reader", "Adobe", "25.001.20672", "Mise à jour", "#24FFBC66", "#FFFFBC66")
+        new("Microsoft 365 Apps", "Microsoft Corporation", "16.0.19127.20264", "UpToDate", "#2457D7A3", "#FF57D7A3"),
+        new("Google Chrome", "Google LLC", "140.0.7339.81", "UpdateAvailable", "#24FFBC66", "#FFFFBC66"),
+        new("7-Zip", "Igor Pavlov", "24.09", "UpToDate", "#2457D7A3", "#FF57D7A3"),
+        new("VLC media player", "VideoLAN", "3.0.21", "RepairSuggested", "#248B7CFF", "#FFA99CFF"),
+        new("Microsoft Teams", "Microsoft Corporation", "25193.1707.3773.5286", "UpToDate", "#2457D7A3", "#FF57D7A3"),
+        new("Adobe Acrobat Reader", "Adobe", "25.001.20672", "UpdateAvailable", "#24FFBC66", "#FFFFBC66")
     ];
 
     public ICollectionView ApplicationsView { get; }
 
     public MainWindow()
     {
+        var settings = SettingsStore.LoadAsync().GetAwaiter().GetResult();
+        LocalizationService.Apply(settings.Language);
         InitializeComponent();
         ApplicationsView = CollectionViewSource.GetDefaultView(_applications);
         DataContext = this;
@@ -52,17 +54,17 @@ public partial class MainWindow : Window
         if (sender is not System.Windows.Controls.Button button || button.DataContext is not ApplicationItem application)
             return;
 
-        var action = button.Tag?.ToString() switch
+        var actionKey = button.Tag?.ToString() switch
         {
-            "Repair" => "Réparer",
-            "Update" => "Mettre à jour",
-            "Uninstall" => "Désinstaller",
-            _ => "Exécuter une action sur"
+            "Repair" => "Repair",
+            "Update" => "Update",
+            "Uninstall" => "Uninstall",
+            _ => "Actions"
         };
 
         MessageBox.Show(
-            $"Prototype sécurisé : l’action « {action} » pour {application.Name} sera ajoutée au moteur d’exécution lors de la prochaine étape.\n\nAucune modification n’a été faite sur ce poste.",
-            "OpenFleet IT · Action simulée",
+            string.Format(LocalizationService.Text("ActionDemoMessage"), LocalizationService.Text(actionKey), application.Name),
+            LocalizationService.Text("ActionDemoTitle"),
             MessageBoxButton.OK,
             MessageBoxImage.Information);
     }
@@ -70,11 +72,27 @@ public partial class MainWindow : Window
     private void OpenSettings_Click(object sender, RoutedEventArgs e)
     {
         new SettingsWindow { Owner = this }.ShowDialog();
+        ApplicationsView.Refresh();
+        AppsGrid.Items.Refresh();
     }
 
     private void OpenFleetScan_Click(object sender, RoutedEventArgs e)
     {
         new FleetScanWindow { Owner = this }.ShowDialog();
+    }
+
+    private void Connect_Click(object sender, RoutedEventArgs e)
+    {
+        var target = ConnectionTargetInput.Text.Trim();
+        if (string.IsNullOrWhiteSpace(target) || target.Length > 255 || target.Any(char.IsWhiteSpace))
+        {
+            MessageBox.Show(LocalizationService.Text("InvalidTargetMessage"), LocalizationService.Text("InvalidTargetTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+
+        DeviceTitleLabel.Text = target.ToUpperInvariant();
+        SelectedDeviceLabel.Text = $"  /  {target}";
+        ConnectionStatusLabel.Text = $"{target.ToUpperInvariant()} · {LocalizationService.Text("ConnectedDemo")}";
     }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -111,9 +129,10 @@ public partial class MainWindow : Window
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int valueSize);
 }
 
-public sealed record ApplicationItem(string Name, string Publisher, string Version, string Status,
+public sealed record ApplicationItem(string Name, string Publisher, string Version, string StatusResourceKey,
     string StatusBackgroundHex, string StatusForegroundHex)
 {
+    public string Status => LocalizationService.Text(StatusResourceKey);
     public Brush StatusBackground => new SolidColorBrush((Color)ColorConverter.ConvertFromString(StatusBackgroundHex));
     public Brush StatusForeground => new SolidColorBrush((Color)ColorConverter.ConvertFromString(StatusForegroundHex));
 }

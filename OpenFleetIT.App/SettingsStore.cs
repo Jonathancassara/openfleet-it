@@ -6,6 +6,7 @@ namespace OpenFleetIT.App;
 public sealed class OpenFleetSettings
 {
     public List<string> DomainSuffixes { get; set; } = [".entreprise.fr", ".coworking.fr"];
+    public string Language { get; set; } = LocalizationService.English;
 }
 
 public static class SettingsStore

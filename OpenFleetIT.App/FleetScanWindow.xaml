@@ -1,28 +1,28 @@
 <Window x:Class="OpenFleetIT.App.FleetScanWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Scanner le parc · OpenFleet IT" Width="900" Height="650" MinWidth="760" MinHeight="560"
+        Title="{DynamicResource FleetDiscovery}" Width="900" Height="650" MinWidth="760" MinHeight="560"
         WindowStartupLocation="CenterOwner" Background="#0D1019" Foreground="White" FontFamily="{StaticResource UiFont}">
     <Grid Margin="28">
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <StackPanel Margin="0,0,0,22">
-            <TextBlock Text="Découverte du parc" FontSize="28" FontWeight="SemiBold"/>
-            <TextBlock Text="Détectez les postes actifs sur une plage IPv4 autorisée." Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0"/>
+            <TextBlock Text="{DynamicResource FleetDiscovery}" FontSize="28" FontWeight="SemiBold"/>
+            <TextBlock Text="{DynamicResource FleetDiscoverySubtitle}" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0"/>
         </StackPanel>
 
         <Border Grid.Row="1" Style="{StaticResource GlassCard}" Padding="20" Margin="0,0,0,18">
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                <StackPanel Margin="0,0,10,0"><TextBlock Text="IP DE DÉBUT" Foreground="#8E98B1" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,7"/><TextBox x:Name="StartIpInput" Text="192.168.1.1" Height="40" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White"/></StackPanel>
-                <StackPanel Grid.Column="1" Margin="10,0"><TextBlock Text="IP DE FIN" Foreground="#8E98B1" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,7"/><TextBox x:Name="EndIpInput" Text="192.168.1.254" Height="40" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White"/></StackPanel>
-                <Button x:Name="ScanButton" Grid.Column="2" Content="Lancer le scan" Padding="20,11" Margin="14,17,0,0" Background="#8B7CFF" Foreground="White" BorderThickness="0" Click="Scan_Click" Cursor="Hand"/>
+                <StackPanel Margin="0,0,10,0"><TextBlock Text="{DynamicResource StartIp}" Foreground="#8E98B1" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,7"/><TextBox x:Name="StartIpInput" Text="192.168.1.1" Height="40" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White"/></StackPanel>
+                <StackPanel Grid.Column="1" Margin="10,0"><TextBlock Text="{DynamicResource EndIp}" Foreground="#8E98B1" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,7"/><TextBox x:Name="EndIpInput" Text="192.168.1.254" Height="40" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White"/></StackPanel>
+                <Button x:Name="ScanButton" Grid.Column="2" Content="{DynamicResource StartScan}" Padding="20,11" Margin="14,17,0,0" Background="#8B7CFF" Foreground="White" BorderThickness="0" Click="Scan_Click" Cursor="Hand"/>
             </Grid>
         </Border>
 
         <Border Grid.Row="2" Style="{StaticResource GlassCard}" Padding="20">
             <Grid>
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
-                <Grid><TextBlock Text="Résultats" FontSize="17" FontWeight="SemiBold"/><TextBlock x:Name="ScanStatus" Text="Prêt" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
+                <Grid><TextBlock Text="{DynamicResource Results}" FontSize="17" FontWeight="SemiBold"/><TextBlock x:Name="ScanStatus" Text="{DynamicResource Ready}" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
                 <ProgressBar x:Name="ScanProgress" Grid.Row="1" Height="4" Margin="0,15,0,12" Minimum="0" Maximum="100" Foreground="#8B7CFF" Background="#20FFFFFF"/>
                 <DataGrid x:Name="ResultsGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
                           Background="#FF0C1019" Foreground="#EAF0FF" BorderBrush="#26FFFFFF" BorderThickness="1"
@@ -49,10 +49,10 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ADRESSE IP" Binding="{Binding Address}" Width="1.1*"/>
-                        <DataGridTextColumn Header="HOSTNAME" Binding="{Binding Hostname}" Width="1.7*"/>
-                        <DataGridTextColumn Header="ÉTAT" Binding="{Binding Status}" Width="0.8*"/>
-                        <DataGridTextColumn Header="LATENCE" Binding="{Binding Latency}" Width="0.7*"/>
+                        <DataGridTextColumn Header="{DynamicResource IpAddress}" Binding="{Binding Address}" Width="1.1*"/>
+                        <DataGridTextColumn Header="{DynamicResource Hostname}" Binding="{Binding Hostname}" Width="1.7*"/>
+                        <DataGridTextColumn Header="{DynamicResource Status}" Binding="{Binding Status}" Width="0.8*"/>
+                        <DataGridTextColumn Header="{DynamicResource Latency}" Binding="{Binding Latency}" Width="0.7*"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

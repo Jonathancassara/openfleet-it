@@ -23,14 +23,14 @@ public partial class FleetScanWindow : Window
     {
         if (!TryCreateRange(StartIpInput.Text, EndIpInput.Text, out var addresses, out var error))
         {
-            MessageBox.Show(error, "Plage IP invalide", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(error, LocalizationService.Text("InvalidRangeTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         _results.Clear();
         ScanButton.IsEnabled = false;
         ScanProgress.Value = 0;
-        ScanStatus.Text = $"Analyse de {addresses.Count} adresses…";
+        ScanStatus.Text = string.Format(LocalizationService.Text("ScanningAddresses"), addresses.Count);
 
         var completed = 0;
         var liveResults = new ConcurrentBag<ScanResult>();
@@ -45,7 +45,7 @@ public partial class FleetScanWindow : Window
                 if (reply.Status == IPStatus.Success)
                 {
                     var hostname = await ResolveHostnameAsync(address);
-                    liveResults.Add(new ScanResult(address.ToString(), hostname, "En ligne", $"{reply.RoundtripTime} ms"));
+                    liveResults.Add(new ScanResult(address.ToString(), hostname, LocalizationService.Text("OnlineStatus"), $"{reply.RoundtripTime} ms"));
                 }
             }
             catch (PingException)
@@ -62,7 +62,7 @@ public partial class FleetScanWindow : Window
 
         await Task.WhenAll(tasks);
         foreach (var result in liveResults.OrderBy(item => ParseIpv4(item.Address))) _results.Add(result);
-        ScanStatus.Text = $"{_results.Count} poste(s) actif(s) sur {addresses.Count}";
+        ScanStatus.Text = string.Format(LocalizationService.Text("ScanComplete"), _results.Count, addresses.Count);
         ScanButton.IsEnabled = true;
     }
 
@@ -73,7 +73,7 @@ public partial class FleetScanWindow : Window
         if (!IPAddress.TryParse(startText.Trim(), out var start) || start.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork
             || !IPAddress.TryParse(endText.Trim(), out var end) || end.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
         {
-            error = "Saisissez deux adresses IPv4 valides.";
+            error = LocalizationService.Text("InvalidIpv4");
             return false;
         }
 
@@ -81,13 +81,13 @@ public partial class FleetScanWindow : Window
         var endValue = ParseIpv4(end.ToString());
         if (endValue < startValue)
         {
-            error = "L’adresse de fin doit être supérieure ou égale à l’adresse de début.";
+            error = LocalizationService.Text("EndBeforeStart");
             return false;
         }
 
         if (endValue - startValue + 1 > 256)
         {
-            error = "La plage est limitée à 256 adresses par scan.";
+            error = LocalizationService.Text("RangeTooLarge");
             return false;
         }
 

@@ -10,6 +10,8 @@ public partial class SettingsWindow : Window
 {
     private static readonly Regex SuffixPattern = new(@"^\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$", RegexOptions.Compiled);
     private readonly ObservableCollection<string> _suffixes = [];
+    private string _selectedLanguage = LocalizationService.English;
+    private bool _isLoaded;
 
     public SettingsWindow()
     {
@@ -19,8 +21,11 @@ public partial class SettingsWindow : Window
         Loaded += async (_, _) =>
         {
             var settings = await SettingsStore.LoadAsync();
+            _selectedLanguage = settings.Language == LocalizationService.French ? LocalizationService.French : LocalizationService.English;
+            LanguageSelector.SelectedIndex = _selectedLanguage == LocalizationService.French ? 1 : 0;
             foreach (var suffix in settings.DomainSuffixes.Distinct(StringComparer.OrdinalIgnoreCase))
                 _suffixes.Add(suffix);
+            _isLoaded = true;
         };
     }
 
@@ -29,7 +34,7 @@ public partial class SettingsWindow : Window
         var suffix = SuffixInput.Text.Trim().ToLowerInvariant();
         if (!SuffixPattern.IsMatch(suffix))
         {
-            MessageBox.Show("Saisissez un suffixe DNS valide, par exemple .entreprise.fr.", "Suffixe invalide", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(LocalizationService.Text("InvalidSuffixMessage"), LocalizationService.Text("InvalidSuffixTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
@@ -45,15 +50,23 @@ public partial class SettingsWindow : Window
 
     private async void Save_Click(object sender, RoutedEventArgs e)
     {
-        await SettingsStore.SaveAsync(new OpenFleetSettings { DomainSuffixes = [.. _suffixes] });
-        SaveStatus.Text = "Paramètres enregistrés localement.";
+        await SettingsStore.SaveAsync(new OpenFleetSettings { DomainSuffixes = [.. _suffixes], Language = _selectedLanguage });
+        SaveStatus.Text = LocalizationService.Text("SettingsSaved");
     }
 
     private async void CheckUpdate_Click(object sender, RoutedEventArgs e)
     {
-        UpdateStatus.Text = "Vérification en cours…";
+        UpdateStatus.Text = LocalizationService.Text("CheckingUpdates");
         await Task.Delay(650);
-        UpdateStatus.Text = "Version 0.1.0-preview · aucune mise à jour disponible (mode démonstration).";
+        UpdateStatus.Text = LocalizationService.Text("NoUpdates");
+    }
+
+    private void LanguageSelector_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (!_isLoaded || LanguageSelector.SelectedItem is not System.Windows.Controls.ComboBoxItem item) return;
+        _selectedLanguage = item.Tag?.ToString() == LocalizationService.French ? LocalizationService.French : LocalizationService.English;
+        LocalizationService.Apply(_selectedLanguage);
+        UpdateStatus.Text = LocalizationService.Text("CurrentVersion");
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
