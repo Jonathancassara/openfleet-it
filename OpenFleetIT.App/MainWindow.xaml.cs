@@ -81,7 +81,7 @@ public partial class MainWindow : Window
         new FleetScanWindow { Owner = this }.ShowDialog();
     }
 
-    private void Connect_Click(object sender, RoutedEventArgs e)
+    private async void Connect_Click(object sender, RoutedEventArgs e)
     {
         var target = ConnectionTargetInput.Text.Trim();
         if (string.IsNullOrWhiteSpace(target) || target.Length > 255 || target.Any(char.IsWhiteSpace))
@@ -90,9 +90,57 @@ public partial class MainWindow : Window
             return;
         }
 
-        DeviceTitleLabel.Text = target.ToUpperInvariant();
-        SelectedDeviceLabel.Text = $"  /  {target}";
-        ConnectionStatusLabel.Text = $"{target.ToUpperInvariant()} · {LocalizationService.Text("ConnectedDemo")}";
+        ConnectButton.IsEnabled = false;
+        ConnectionStatusLabel.Text = string.Format(LocalizationService.Text("Connecting"), target.ToUpperInvariant());
+        try
+        {
+            var information = await PcInfoService.GetAsync(target);
+            var uptime = DateTime.Now - information.LastBoot;
+            var firewallText = information.FirewallEnabled switch
+            {
+                true => LocalizationService.Text("Enabled"),
+                false => LocalizationService.Text("Disabled"),
+                null => LocalizationService.Text("Unknown")
+            };
+            var restartText = information.RestartPending switch
+            {
+                true => LocalizationService.Text("Yes"),
+                false => LocalizationService.Text("No"),
+                null => LocalizationService.Text("Unknown")
+            };
+
+            DeviceTitleLabel.Text = information.Hostname.ToUpperInvariant();
+            SelectedDeviceLabel.Text = $"  /  {information.Hostname}";
+            ConnectionStatusLabel.Text = $"{information.Manufacturer} {information.Model} · {LocalizationService.Text("Connected")}".Trim();
+            WindowsVersionLabel.Text = information.WindowsCaption.Replace("Microsoft ", string.Empty, StringComparison.OrdinalIgnoreCase);
+            WindowsBuildLabel.Text = string.Format(LocalizationService.Text("BuildFormat"), information.WindowsVersion, information.BuildNumber);
+            UptimeLabel.Text = string.Format(LocalizationService.Text("UptimeFormat"), Math.Max(0, uptime.Days), Math.Max(0, uptime.Hours));
+            BootDateLabel.Text = string.Format(LocalizationService.Text("BootDateFormat"), information.LastBoot);
+            FirewallStatusLabel.Text = firewallText;
+            FirewallDetailsLabel.Text = information.FirewallProfileCount > 0
+                ? string.Format(LocalizationService.Text("FirewallProfilesFormat"), information.FirewallProfileCount)
+                : LocalizationService.Text("InformationUnavailable");
+            RestartStatusLabel.Text = restartText;
+            RestartReasonLabel.Text = information.RestartPending switch
+            {
+                true => LocalizationService.Text("SystemRegistry"),
+                false => LocalizationService.Text("NoRestartPending"),
+                null => LocalizationService.Text("InformationUnavailable")
+            };
+        }
+        catch (Exception exception)
+        {
+            ConnectionStatusLabel.Text = LocalizationService.Text("ConnectionFailedTitle").ToUpperInvariant();
+            MessageBox.Show(
+                string.Format(LocalizationService.Text("ConnectionFailedMessage"), target, exception.Message),
+                LocalizationService.Text("ConnectionFailedTitle"),
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        }
+        finally
+        {
+            ConnectButton.IsEnabled = true;
+        }
     }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)

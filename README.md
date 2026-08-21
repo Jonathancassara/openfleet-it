@@ -18,6 +18,8 @@ The first desktop prototype is a native Windows application built with C#, WPF a
 - English as the default interface language with complete French localization;
 - persistent language selection in Settings;
 - workstation targeting by hostname or IP address;
+- live Windows information collection through WMI using the current Windows identity;
+- real operating-system version/build, last-boot, firewall-profile and pending-restart detection;
 - a custom resizable window with native minimize, maximize and close actions.
 
 ## Run locally
