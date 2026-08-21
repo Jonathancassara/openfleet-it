@@ -2,7 +2,9 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace OpenFleetIT.App;
 
@@ -14,6 +16,7 @@ public partial class FleetScanWindow : Window
     {
         InitializeComponent();
         ResultsGrid.ItemsSource = _results;
+        SourceInitialized += (_, _) => EnableDarkTitleBar();
     }
 
     private async void Scan_Click(object sender, RoutedEventArgs e)
@@ -40,7 +43,10 @@ public partial class FleetScanWindow : Window
                 using var ping = new Ping();
                 var reply = await ping.SendPingAsync(address, TimeSpan.FromMilliseconds(700));
                 if (reply.Status == IPStatus.Success)
-                    liveResults.Add(new ScanResult(address.ToString(), "En ligne", $"{reply.RoundtripTime} ms"));
+                {
+                    var hostname = await ResolveHostnameAsync(address);
+                    liveResults.Add(new ScanResult(address.ToString(), hostname, "En ligne", $"{reply.RoundtripTime} ms"));
+                }
             }
             catch (PingException)
             {
@@ -95,6 +101,31 @@ public partial class FleetScanWindow : Window
         var bytes = IPAddress.Parse(address).GetAddressBytes();
         return ((uint)bytes[0] << 24) | ((uint)bytes[1] << 16) | ((uint)bytes[2] << 8) | bytes[3];
     }
+
+    private static async Task<string> ResolveHostnameAsync(IPAddress address)
+    {
+        try
+        {
+            var entry = await Dns.GetHostEntryAsync(address).WaitAsync(TimeSpan.FromMilliseconds(900));
+            return string.IsNullOrWhiteSpace(entry.HostName) ? "—" : entry.HostName;
+        }
+        catch (Exception exception) when (exception is System.Net.Sockets.SocketException or TimeoutException)
+        {
+            return "—";
+        }
+    }
+
+    private void EnableDarkTitleBar()
+    {
+        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763)) return;
+        var hwnd = new WindowInteropHelper(this).Handle;
+        const int darkModeAttribute = 20;
+        var enabled = 1;
+        _ = DwmSetWindowAttribute(hwnd, darkModeAttribute, ref enabled, sizeof(int));
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int valueSize);
 }
 
-public sealed record ScanResult(string Address, string Status, string Latency);
+public sealed record ScanResult(string Address, string Hostname, string Status, string Latency);

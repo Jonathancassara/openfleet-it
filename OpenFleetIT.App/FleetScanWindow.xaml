@@ -24,11 +24,35 @@
                 <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                 <Grid><TextBlock Text="Résultats" FontSize="17" FontWeight="SemiBold"/><TextBlock x:Name="ScanStatus" Text="Prêt" Foreground="{StaticResource TextSecondary}" HorizontalAlignment="Right" VerticalAlignment="Center"/></Grid>
                 <ProgressBar x:Name="ScanProgress" Grid.Row="1" Height="4" Margin="0,15,0,12" Minimum="0" Maximum="100" Foreground="#8B7CFF" Background="#20FFFFFF"/>
-                <DataGrid x:Name="ResultsGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" Background="Transparent" Foreground="White" BorderThickness="0" GridLinesVisibility="None" RowHeaderWidth="0" HeadersVisibility="Column">
+                <DataGrid x:Name="ResultsGrid" Grid.Row="2" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False"
+                          Background="#FF0C1019" Foreground="#EAF0FF" BorderBrush="#26FFFFFF" BorderThickness="1"
+                          GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#14FFFFFF" RowHeaderWidth="0"
+                          HeadersVisibility="Column" RowHeight="39" ColumnHeaderHeight="34" AlternationCount="2"
+                          SelectionMode="Single" SelectionUnit="FullRow">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridColumnHeader">
+                            <Setter Property="Background" Value="#FF161B28"/><Setter Property="Foreground" Value="#8E98B1"/>
+                            <Setter Property="BorderBrush" Value="#1FFFFFFF"/><Setter Property="BorderThickness" Value="0,0,1,1"/>
+                            <Setter Property="FontSize" Value="10"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Padding" Value="12,0"/>
+                        </Style>
+                        <Style TargetType="DataGridRow">
+                            <Setter Property="Background" Value="#FF0C1019"/><Setter Property="Foreground" Value="#EAF0FF"/>
+                            <Style.Triggers>
+                                <Trigger Property="AlternationIndex" Value="1"><Setter Property="Background" Value="#FF111622"/></Trigger>
+                                <Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#FF20263A"/></Trigger>
+                                <Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#FF302A57"/><Setter Property="Foreground" Value="White"/></Trigger>
+                            </Style.Triggers>
+                        </Style>
+                        <Style TargetType="DataGridCell">
+                            <Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="12,0"/>
+                            <Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+                        </Style>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="ADRESSE IP" Binding="{Binding Address}" Width="*"/>
-                        <DataGridTextColumn Header="ÉTAT" Binding="{Binding Status}" Width="*"/>
-                        <DataGridTextColumn Header="LATENCE" Binding="{Binding Latency}" Width="*"/>
+                        <DataGridTextColumn Header="ADRESSE IP" Binding="{Binding Address}" Width="1.1*"/>
+                        <DataGridTextColumn Header="HOSTNAME" Binding="{Binding Hostname}" Width="1.7*"/>
+                        <DataGridTextColumn Header="ÉTAT" Binding="{Binding Status}" Width="0.8*"/>
+                        <DataGridTextColumn Header="LATENCE" Binding="{Binding Latency}" Width="0.7*"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

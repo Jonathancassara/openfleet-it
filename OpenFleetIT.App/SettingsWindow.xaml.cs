@@ -1,6 +1,8 @@
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace OpenFleetIT.App;
 
@@ -13,6 +15,7 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         SuffixList.ItemsSource = _suffixes;
+        SourceInitialized += (_, _) => EnableDarkTitleBar();
         Loaded += async (_, _) =>
         {
             var settings = await SettingsStore.LoadAsync();
@@ -54,4 +57,16 @@ public partial class SettingsWindow : Window
     }
 
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
+    private void EnableDarkTitleBar()
+    {
+        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763)) return;
+        var hwnd = new WindowInteropHelper(this).Handle;
+        const int darkModeAttribute = 20;
+        var enabled = 1;
+        _ = DwmSetWindowAttribute(hwnd, darkModeAttribute, ref enabled, sizeof(int));
+    }
+
+    [DllImport("dwmapi.dll")]
+    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int valueSize);
 }

@@ -23,8 +23,8 @@
                     <Grid Grid.Row="2">
                         <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
                         <TextBox x:Name="SuffixInput" Height="38" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White" ToolTip="Exemple : .entreprise.fr"/>
-                        <Button Grid.Column="1" Content="＋" Width="42" Height="38" Margin="9,0,0,0" Style="{StaticResource IconButton}" Click="AddSuffix_Click" ToolTip="Ajouter"/>
-                        <Button Grid.Column="2" Content="−" Width="42" Height="38" Margin="7,0,0,0" Style="{StaticResource IconButton}" Click="RemoveSuffix_Click" ToolTip="Supprimer la sélection"/>
+                        <Button Grid.Column="1" Content="&#xE710;" Width="42" Height="38" Margin="9,0,0,0" Style="{StaticResource IconButton}" Click="AddSuffix_Click" ToolTip="Ajouter"/>
+                        <Button Grid.Column="2" Content="&#xE738;" Width="42" Height="38" Margin="7,0,0,0" Style="{StaticResource IconButton}" Click="RemoveSuffix_Click" ToolTip="Supprimer la sélection"/>
                     </Grid>
                 </Grid>
             </Border>
@@ -44,7 +44,7 @@
         <Grid Grid.Row="2" Margin="0,22,0,0">
             <TextBlock x:Name="SaveStatus" Foreground="{StaticResource Success}" VerticalAlignment="Center"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="Fermer" Padding="18,9" Margin="0,0,8,0" Click="Close_Click"/>
+                <Button Content="Fermer" Padding="18,9" Margin="0,0,8,0" Background="#FF1B2130" Foreground="#EAF0FF" BorderBrush="#30FFFFFF" Click="Close_Click"/>
                 <Button Content="Enregistrer" Padding="18,9" Background="#8B7CFF" Foreground="White" BorderThickness="0" Click="Save_Click"/>
             </StackPanel>
         </Grid>
