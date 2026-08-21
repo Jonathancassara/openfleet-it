@@ -12,6 +12,9 @@ The first desktop prototype is a native Windows application built with C#, WPF a
 - a searchable installed-application inventory;
 - safe prototype actions for repair, update and uninstall workflows;
 - endpoint health and recent activity panels;
+- persistent DNS suffix management for environment discovery;
+- a bounded IPv4 range scanner with live-host results;
+- an application update settings panel;
 - a custom resizable window with native minimize, maximize and close actions.
 
 ## Run locally

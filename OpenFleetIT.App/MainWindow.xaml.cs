@@ -67,6 +67,16 @@ public partial class MainWindow : Window
             MessageBoxImage.Information);
     }
 
+    private void OpenSettings_Click(object sender, RoutedEventArgs e)
+    {
+        new SettingsWindow { Owner = this }.ShowDialog();
+    }
+
+    private void OpenFleetScan_Click(object sender, RoutedEventArgs e)
+    {
+        new FleetScanWindow { Owner = this }.ShowDialog();
+    }
+
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         if (e.ClickCount == 2)

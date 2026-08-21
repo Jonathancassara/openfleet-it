@@ -1,0 +1,52 @@
+<Window x:Class="OpenFleetIT.App.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Paramètres · OpenFleet IT" Width="760" Height="650" MinWidth="680" MinHeight="580"
+        WindowStartupLocation="CenterOwner" Background="#0D1019" Foreground="White"
+        FontFamily="{StaticResource UiFont}">
+    <Grid Margin="28">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel Margin="0,0,0,22">
+            <TextBlock Text="Paramètres" FontSize="28" FontWeight="SemiBold"/>
+            <TextBlock Text="Découverte réseau et maintenance de l’application" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1">
+            <Border Style="{StaticResource GlassCard}" Padding="22" Margin="0,0,0,18">
+                <Grid>
+                    <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Suffixes DNS autorisés" FontSize="17" FontWeight="SemiBold"/>
+                        <TextBlock Text="Utilisés pour reconnaître les équipements appartenant à vos environnements." Foreground="{StaticResource TextSecondary}" FontSize="11" Margin="0,5,0,0"/>
+                    </StackPanel>
+                    <ListBox x:Name="SuffixList" Grid.Row="1" Height="170" Margin="0,18,0,12" Background="#30101420" BorderBrush="#25FFFFFF" BorderThickness="1" Foreground="White" Padding="6"/>
+                    <Grid Grid.Row="2">
+                        <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <TextBox x:Name="SuffixInput" Height="38" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White" ToolTip="Exemple : .entreprise.fr"/>
+                        <Button Grid.Column="1" Content="＋" Width="42" Height="38" Margin="9,0,0,0" Style="{StaticResource IconButton}" Click="AddSuffix_Click" ToolTip="Ajouter"/>
+                        <Button Grid.Column="2" Content="−" Width="42" Height="38" Margin="7,0,0,0" Style="{StaticResource IconButton}" Click="RemoveSuffix_Click" ToolTip="Supprimer la sélection"/>
+                    </Grid>
+                </Grid>
+            </Border>
+
+            <Border Style="{StaticResource GlassCard}" Padding="22">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel>
+                        <TextBlock Text="Mises à jour OpenFleet IT" FontSize="17" FontWeight="SemiBold"/>
+                        <TextBlock x:Name="UpdateStatus" Text="Version actuelle : 0.1.0-preview" Foreground="{StaticResource TextSecondary}" FontSize="11" Margin="0,6,0,0"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Content="Rechercher les mises à jour" Padding="16,10" VerticalAlignment="Center" Background="#338B7CFF" Foreground="White" BorderBrush="#558B7CFF" BorderThickness="1" Click="CheckUpdate_Click" Cursor="Hand"/>
+                </Grid>
+            </Border>
+        </StackPanel>
+
+        <Grid Grid.Row="2" Margin="0,22,0,0">
+            <TextBlock x:Name="SaveStatus" Foreground="{StaticResource Success}" VerticalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Content="Fermer" Padding="18,9" Margin="0,0,8,0" Click="Close_Click"/>
+                <Button Content="Enregistrer" Padding="18,9" Background="#8B7CFF" Foreground="White" BorderThickness="0" Click="Save_Click"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

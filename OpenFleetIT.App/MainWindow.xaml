@@ -37,9 +37,9 @@
                         <RadioButton Style="{StaticResource NavButton}" Content="Sécurité" Tag="&#xE72E;"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="Redémarrages" Tag="&#xE777;"/>
                         <TextBlock Text="ADMINISTRATION" FontSize="10" FontWeight="SemiBold" Foreground="#77819A" Margin="14,24,0,9"/>
-                        <RadioButton Style="{StaticResource NavButton}" Content="Parc informatique" Tag="&#xE772;"/>
+                        <RadioButton Style="{StaticResource NavButton}" Content="Parc informatique" Tag="&#xE772;" Click="OpenFleetScan_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="Journal d’actions" Tag="&#xE81C;"/>
-                        <RadioButton Style="{StaticResource NavButton}" Content="Paramètres" Tag="&#xE713;"/>
+                        <RadioButton Style="{StaticResource NavButton}" Content="Paramètres" Tag="&#xE713;" Click="OpenSettings_Click"/>
                     </StackPanel>
                     <Border Grid.Row="3" Background="#12FFFFFF" BorderBrush="#1FFFFFFF" BorderThickness="1" CornerRadius="18" Padding="12" Margin="0,12,0,0">
                         <Grid>
