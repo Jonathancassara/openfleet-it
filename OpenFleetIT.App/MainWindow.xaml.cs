@@ -11,41 +11,60 @@ namespace OpenFleetIT.App;
 
 public partial class MainWindow : Window
 {
-    private readonly ObservableCollection<DeviceItem> _devices =
+    private readonly ObservableCollection<ApplicationItem> _applications =
     [
-        new("OF-LT-0248", "Surface Laptop 6", "Alice Martin", "Windows 11 24H2", "Conforme", "Il y a 2 min", "#2457D7A3", "#FF57D7A3"),
-        new("OF-WS-0187", "Dell Precision 3680", "Marc Leroy", "Windows 11 24H2", "Conforme", "Il y a 5 min", "#2457D7A3", "#FF57D7A3"),
-        new("OF-LT-0314", "ThinkPad T14 Gen 5", "Sofia Benali", "Windows 11 23H2", "À surveiller", "Il y a 12 min", "#24FFBC66", "#FFFFBC66"),
-        new("OF-MB-0042", "MacBook Pro 14", "Thomas Robert", "macOS 15.5", "Conforme", "Il y a 19 min", "#2457D7A3", "#FF57D7A3"),
-        new("OF-LT-0098", "HP EliteBook 840", "Camille Dupont", "Windows 10 22H2", "Critique", "Il y a 31 min", "#24FF7188", "#FFFF7188"),
-        new("OF-PH-0116", "iPhone 16 Pro", "Nicolas Petit", "iOS 19.0", "Conforme", "Il y a 44 min", "#2457D7A3", "#FF57D7A3")
+        new("Microsoft 365 Apps", "Microsoft Corporation", "16.0.19127.20264", "À jour", "#2457D7A3", "#FF57D7A3"),
+        new("Google Chrome", "Google LLC", "140.0.7339.81", "Mise à jour", "#24FFBC66", "#FFFFBC66"),
+        new("7-Zip", "Igor Pavlov", "24.09", "À jour", "#2457D7A3", "#FF57D7A3"),
+        new("VLC media player", "VideoLAN", "3.0.21", "Réparation", "#248B7CFF", "#FFA99CFF"),
+        new("Microsoft Teams", "Microsoft Corporation", "25193.1707.3773.5286", "À jour", "#2457D7A3", "#FF57D7A3"),
+        new("Adobe Acrobat Reader", "Adobe", "25.001.20672", "Mise à jour", "#24FFBC66", "#FFFFBC66")
     ];
 
-    public ICollectionView DevicesView { get; }
+    public ICollectionView ApplicationsView { get; }
 
     public MainWindow()
     {
         InitializeComponent();
-        DevicesView = CollectionViewSource.GetDefaultView(_devices);
+        ApplicationsView = CollectionViewSource.GetDefaultView(_applications);
         DataContext = this;
         SourceInitialized += (_, _) => EnableSystemBackdrop();
     }
 
     private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
-        if (DevicesView is null) return;
+        if (ApplicationsView is null) return;
 
         var query = SearchBox.Text.Trim();
-        DevicesView.Filter = item =>
+        ApplicationsView.Filter = item =>
         {
             if (string.IsNullOrWhiteSpace(query)) return true;
-            if (item is not DeviceItem device) return false;
-            return device.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
-                   || device.Model.Contains(query, StringComparison.OrdinalIgnoreCase)
-                   || device.User.Contains(query, StringComparison.OrdinalIgnoreCase)
-                   || device.OperatingSystem.Contains(query, StringComparison.OrdinalIgnoreCase)
-                   || device.Status.Contains(query, StringComparison.OrdinalIgnoreCase);
+            if (item is not ApplicationItem application) return false;
+            return application.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+                   || application.Publisher.Contains(query, StringComparison.OrdinalIgnoreCase)
+                   || application.Version.Contains(query, StringComparison.OrdinalIgnoreCase)
+                   || application.Status.Contains(query, StringComparison.OrdinalIgnoreCase);
         };
+    }
+
+    private void AppAction_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button || button.DataContext is not ApplicationItem application)
+            return;
+
+        var action = button.Tag?.ToString() switch
+        {
+            "Repair" => "Réparer",
+            "Update" => "Mettre à jour",
+            "Uninstall" => "Désinstaller",
+            _ => "Exécuter une action sur"
+        };
+
+        MessageBox.Show(
+            $"Prototype sécurisé : l’action « {action} » pour {application.Name} sera ajoutée au moteur d’exécution lors de la prochaine étape.\n\nAucune modification n’a été faite sur ce poste.",
+            "OpenFleet IT · Action simulée",
+            MessageBoxButton.OK,
+            MessageBoxImage.Information);
     }
 
     private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
@@ -82,8 +101,8 @@ public partial class MainWindow : Window
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int valueSize);
 }
 
-public sealed record DeviceItem(string Name, string Model, string User, string OperatingSystem, string Status,
-    string LastSeen, string StatusBackgroundHex, string StatusForegroundHex)
+public sealed record ApplicationItem(string Name, string Publisher, string Version, string Status,
+    string StatusBackgroundHex, string StatusForegroundHex)
 {
     public Brush StatusBackground => new SolidColorBrush((Color)ColorConverter.ConvertFromString(StatusBackgroundHex));
     public Brush StatusForeground => new SolidColorBrush((Color)ColorConverter.ConvertFromString(StatusForegroundHex));

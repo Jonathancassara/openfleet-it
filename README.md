@@ -7,9 +7,11 @@ Source-available IT asset management and compliance dashboard for Microsoft Intu
 The first desktop prototype is a native Windows application built with C#, WPF and .NET 10. It includes:
 
 - a modern glass dashboard with Windows 11 Mica support;
-- fleet, compliance and BitLocker overview cards;
-- a searchable device inventory with demonstration data;
-- compliance health and recent activity panels;
+- workstation details including Windows edition, version and build;
+- firewall, last boot and pending-reboot status cards;
+- a searchable installed-application inventory;
+- safe prototype actions for repair, update and uninstall workflows;
+- endpoint health and recent activity panels;
 - a custom resizable window with native minimize, maximize and close actions.
 
 ## Run locally
