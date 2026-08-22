@@ -64,30 +64,32 @@ public partial class MainWindow : Window
 
     private void OpenSettings_Click(object sender, RoutedEventArgs e)
     {
-        new SettingsWindow { Owner = this }.ShowDialog();
+        ShowCentralPanel(CentralPage.Settings);
         ApplicationsView.Refresh();
         AppsGrid.Items.Refresh();
     }
 
     private void OpenFleetScan_Click(object sender, RoutedEventArgs e)
     {
-        new FleetScanWindow { Owner = this }.ShowDialog();
+        ShowCentralPanel(CentralPage.Fleet);
     }
 
     private void OpenCommands_Click(object sender, RoutedEventArgs e)
     {
-        ShowCentralPanel(commands: true);
+        ShowCentralPanel(CentralPage.Commands);
         CommandTargetLabel.Text = string.IsNullOrWhiteSpace(_connectedTarget)
             ? LocalizationService.Text("NoConnectedDevice")
             : _connectedTarget;
     }
 
-    private void OpenWorkstation_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(commands: false);
+    private void OpenWorkstation_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Workstation);
 
-    private void ShowCentralPanel(bool commands)
+    private void ShowCentralPanel(CentralPage page)
     {
-        CommandsPanel.Visibility = commands ? Visibility.Visible : Visibility.Collapsed;
-        var deviceVisibility = !commands && !string.IsNullOrWhiteSpace(_connectedTarget)
+        CommandsPanel.Visibility = page == CentralPage.Commands ? Visibility.Visible : Visibility.Collapsed;
+        FleetPanel.Visibility = page == CentralPage.Fleet ? Visibility.Visible : Visibility.Collapsed;
+        SettingsPanel.Visibility = page == CentralPage.Settings ? Visibility.Visible : Visibility.Collapsed;
+        var deviceVisibility = page == CentralPage.Workstation && !string.IsNullOrWhiteSpace(_connectedTarget)
             ? Visibility.Visible
             : Visibility.Collapsed;
         DeviceHeaderPanel.Visibility = deviceVisibility;
@@ -145,8 +147,8 @@ public partial class MainWindow : Window
             _connectedTarget = target;
             if (CommandsPanel.Visibility == Visibility.Visible)
                 CommandTargetLabel.Text = target;
-            else
-                ShowCentralPanel(commands: false);
+            else if (FleetPanel.Visibility != Visibility.Visible && SettingsPanel.Visibility != Visibility.Visible)
+                ShowCentralPanel(CentralPage.Workstation);
 
             await LoadSoftwareInventoryAsync(target);
         }
@@ -234,6 +236,14 @@ public partial class MainWindow : Window
 
     [DllImport("dwmapi.dll")]
     private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int valueSize);
+}
+
+internal enum CentralPage
+{
+    Workstation,
+    Commands,
+    Fleet,
+    Settings
 }
 
 public sealed record ApplicationItem(string Name, string Publisher, string Version, string StatusResourceKey,

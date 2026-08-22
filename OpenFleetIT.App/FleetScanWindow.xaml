@@ -1,9 +1,8 @@
-<Window x:Class="OpenFleetIT.App.FleetScanWindow"
+<UserControl x:Class="OpenFleetIT.App.FleetScanWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="{DynamicResource FleetDiscovery}" Width="900" Height="650" MinWidth="760" MinHeight="560"
-        WindowStartupLocation="CenterOwner" Background="#0D1019" Foreground="White" FontFamily="{StaticResource UiFont}">
-    <Grid Margin="28">
+        Background="Transparent" Foreground="White" FontFamily="{StaticResource UiFont}">
+    <Grid Margin="2">
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
         <StackPanel Margin="0,0,0,22">
             <TextBlock Text="{DynamicResource FleetDiscovery}" FontSize="28" FontWeight="SemiBold"/>
@@ -13,8 +12,8 @@
         <Border Grid.Row="1" Style="{StaticResource GlassCard}" Padding="20" Margin="0,0,0,18">
             <Grid>
                 <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                <StackPanel Margin="0,0,10,0"><TextBlock Text="{DynamicResource StartIp}" Foreground="#8E98B1" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,7"/><TextBox x:Name="StartIpInput" Text="192.168.1.1" Height="40" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White"/></StackPanel>
-                <StackPanel Grid.Column="1" Margin="10,0"><TextBlock Text="{DynamicResource EndIp}" Foreground="#8E98B1" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,7"/><TextBox x:Name="EndIpInput" Text="192.168.1.254" Height="40" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White"/></StackPanel>
+                <StackPanel Margin="0,0,10,0"><TextBlock Text="{DynamicResource StartIp}" Foreground="#8E98B1" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,7"/><TextBox x:Name="StartIpInput" Height="40" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White"/></StackPanel>
+                <StackPanel Grid.Column="1" Margin="10,0"><TextBlock Text="{DynamicResource EndIp}" Foreground="#8E98B1" FontSize="10" FontWeight="SemiBold" Margin="0,0,0,7"/><TextBox x:Name="EndIpInput" Height="40" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White"/></StackPanel>
                 <Button x:Name="ScanButton" Grid.Column="2" Content="{DynamicResource StartScan}" Padding="20,11" Margin="14,17,0,0" Background="#8B7CFF" Foreground="White" BorderThickness="0" Click="Scan_Click" Cursor="Hand"/>
             </Grid>
         </Border>
@@ -58,4 +57,4 @@
             </Grid>
         </Border>
     </Grid>
-</Window>
+</UserControl>

@@ -2,13 +2,12 @@ using System.Collections.Concurrent;
 using System.Collections.ObjectModel;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
 using System.Windows;
-using System.Windows.Interop;
+using System.Windows.Controls;
 
 namespace OpenFleetIT.App;
 
-public partial class FleetScanWindow : Window
+public partial class FleetScanWindow : UserControl
 {
     private readonly ObservableCollection<ScanResult> _results = [];
 
@@ -16,7 +15,6 @@ public partial class FleetScanWindow : Window
     {
         InitializeComponent();
         ResultsGrid.ItemsSource = _results;
-        SourceInitialized += (_, _) => EnableDarkTitleBar();
     }
 
     private async void Scan_Click(object sender, RoutedEventArgs e)
@@ -115,17 +113,6 @@ public partial class FleetScanWindow : Window
         }
     }
 
-    private void EnableDarkTitleBar()
-    {
-        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763)) return;
-        var hwnd = new WindowInteropHelper(this).Handle;
-        const int darkModeAttribute = 20;
-        var enabled = 1;
-        _ = DwmSetWindowAttribute(hwnd, darkModeAttribute, ref enabled, sizeof(int));
-    }
-
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int valueSize);
 }
 
 public sealed record ScanResult(string Address, string Hostname, string Status, string Latency);

@@ -1,10 +1,8 @@
-<Window x:Class="OpenFleetIT.App.SettingsWindow"
+<UserControl x:Class="OpenFleetIT.App.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="{DynamicResource Settings}" Width="760" Height="780" MinWidth="680" MinHeight="700"
-        WindowStartupLocation="CenterOwner" Background="#0D1019" Foreground="White"
-        FontFamily="{StaticResource UiFont}">
-    <Grid Margin="28">
+        Background="Transparent" Foreground="White" FontFamily="{StaticResource UiFont}">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"><Grid Margin="2,2,14,2">
         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
         <StackPanel Margin="0,0,0,22">
             <TextBlock Text="{DynamicResource Settings}" FontSize="28" FontWeight="SemiBold"/>
@@ -50,9 +48,8 @@
         <Grid Grid.Row="2" Margin="0,22,0,0">
             <TextBlock x:Name="SaveStatus" Foreground="{StaticResource Success}" VerticalAlignment="Center"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Content="{DynamicResource Close}" Padding="18,9" Margin="0,0,8,0" Background="#FF1B2130" Foreground="#EAF0FF" BorderBrush="#30FFFFFF" Click="Close_Click"/>
                 <Button Content="{DynamicResource Save}" Padding="18,9" Background="#8B7CFF" Foreground="White" BorderThickness="0" Click="Save_Click"/>
             </StackPanel>
         </Grid>
-    </Grid>
-</Window>
+    </Grid></ScrollViewer>
+</UserControl>

@@ -1,12 +1,11 @@
 using System.Collections.ObjectModel;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Windows;
-using System.Windows.Interop;
+using System.Windows.Controls;
 
 namespace OpenFleetIT.App;
 
-public partial class SettingsWindow : Window
+public partial class SettingsWindow : UserControl
 {
     private static readonly Regex SuffixPattern = new(@"^\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$", RegexOptions.Compiled);
     private readonly ObservableCollection<string> _suffixes = [];
@@ -17,7 +16,6 @@ public partial class SettingsWindow : Window
     {
         InitializeComponent();
         SuffixList.ItemsSource = _suffixes;
-        SourceInitialized += (_, _) => EnableDarkTitleBar();
         Loaded += async (_, _) =>
         {
             var settings = await SettingsStore.LoadAsync();
@@ -69,17 +67,4 @@ public partial class SettingsWindow : Window
         UpdateStatus.Text = LocalizationService.Text("CurrentVersion");
     }
 
-    private void Close_Click(object sender, RoutedEventArgs e) => Close();
-
-    private void EnableDarkTitleBar()
-    {
-        if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 17763)) return;
-        var hwnd = new WindowInteropHelper(this).Handle;
-        const int darkModeAttribute = 20;
-        var enabled = 1;
-        _ = DwmSetWindowAttribute(hwnd, darkModeAttribute, ref enabled, sizeof(int));
-    }
-
-    [DllImport("dwmapi.dll")]
-    private static extern int DwmSetWindowAttribute(IntPtr hwnd, int attribute, ref int value, int valueSize);
 }
