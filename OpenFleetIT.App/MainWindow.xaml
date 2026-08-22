@@ -93,15 +93,31 @@
                                         <Style TargetType="DataGridColumnHeader"><Setter Property="Background" Value="Transparent"/><Setter Property="Foreground" Value="#77819A"/><Setter Property="BorderThickness" Value="0"/><Setter Property="FontSize" Value="9"/><Setter Property="FontWeight" Value="SemiBold"/><Setter Property="Padding" Value="8,0"/></Style>
                                         <Style TargetType="DataGridRow"><Setter Property="Background" Value="Transparent"/><Setter Property="BorderBrush" Value="#12FFFFFF"/><Setter Property="BorderThickness" Value="0,0,0,1"/><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#10FFFFFF"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#238B7CFF"/></Trigger></Style.Triggers></Style>
                                         <Style TargetType="DataGridCell"><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="8,0"/><Setter Property="VerticalContentAlignment" Value="Center"/><Setter Property="FocusVisualStyle" Value="{x:Null}"/></Style>
+                                        <Style x:Key="ApplicationActionButton" TargetType="Button">
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <Border x:Name="ActionBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <ControlTemplate.Triggers>
+                                                            <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ActionBorder" Property="Opacity" Value="0.82"/></Trigger>
+                                                            <Trigger Property="IsPressed" Value="True"><Setter TargetName="ActionBorder" Property="Opacity" Value="0.65"/></Trigger>
+                                                            <Trigger Property="IsEnabled" Value="False"><Setter TargetName="ActionBorder" Property="Opacity" Value="0.32"/><Setter Property="Cursor" Value="Arrow"/></Trigger>
+                                                        </ControlTemplate.Triggers>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
                                     </DataGrid.Resources>
                                     <DataGrid.Columns>
                                         <DataGridTemplateColumn Header="{DynamicResource Application}" Width="1.7*"><DataGridTemplateColumn.CellTemplate><DataTemplate><StackPanel VerticalAlignment="Center"><TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="11"/><TextBlock Text="{Binding Publisher}" Foreground="{StaticResource TextSecondary}" FontSize="9" Margin="0,3,0,0"/></StackPanel></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                                         <DataGridTextColumn Header="{DynamicResource Version}" Binding="{Binding Version}" Width="0.85*"/>
                                         <DataGridTemplateColumn Header="{DynamicResource Status}" Width="0.9*"><DataGridTemplateColumn.CellTemplate><DataTemplate><Border Style="{StaticResource Pill}" HorizontalAlignment="Left" Background="{Binding StatusBackground}"><TextBlock Text="{Binding Status}" Foreground="{Binding StatusForeground}" FontSize="9" FontWeight="SemiBold"/></Border></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                                         <DataGridTemplateColumn Header="{DynamicResource Actions}" Width="1.9*"><DataGridTemplateColumn.CellTemplate><DataTemplate><StackPanel Orientation="Horizontal">
-                                            <Button Content="{DynamicResource Repair}" Tag="Repair" IsEnabled="{Binding CanRepair}" Click="AppAction_Click" Padding="9,5" Margin="0,0,5,0" Background="#228B7CFF" Foreground="#D7D2FF" BorderBrush="#408B7CFF" BorderThickness="1" Cursor="Hand"/>
-                                            <Button Content="{DynamicResource Update}" Tag="Update" IsEnabled="{Binding CanUpdate}" Click="AppAction_Click" Padding="9,5" Margin="0,0,5,0" Background="#2257D7A3" Foreground="#8EF1C5" BorderBrush="#4057D7A3" BorderThickness="1" Cursor="Hand"/>
-                                            <Button Content="{DynamicResource Uninstall}" Tag="Uninstall" IsEnabled="{Binding CanUninstall}" Click="AppAction_Click" Padding="9,5" Background="#22FF7188" Foreground="#FFA4B3" BorderBrush="#40FF7188" BorderThickness="1" Cursor="Hand"/>
+                                            <Button Style="{StaticResource ApplicationActionButton}" Content="{DynamicResource Repair}" Tag="Repair" IsEnabled="{Binding CanRepair}" Click="AppAction_Click" Padding="9,5" Margin="0,0,5,0" Background="#228B7CFF" Foreground="#D7D2FF" BorderBrush="#408B7CFF" BorderThickness="1" Cursor="Hand"/>
+                                            <Button Style="{StaticResource ApplicationActionButton}" Content="{DynamicResource Update}" Tag="Update" IsEnabled="{Binding CanUpdate}" Click="AppAction_Click" Padding="9,5" Margin="0,0,5,0" Background="#2257D7A3" Foreground="#8EF1C5" BorderBrush="#4057D7A3" BorderThickness="1" Cursor="Hand"/>
+                                            <Button Style="{StaticResource ApplicationActionButton}" Content="{DynamicResource Uninstall}" Tag="Uninstall" IsEnabled="{Binding CanUninstall}" Click="AppAction_Click" Padding="9,5" Background="#22FF7188" Foreground="#FFA4B3" BorderBrush="#40FF7188" BorderThickness="1" Cursor="Hand"/>
                                         </StackPanel></DataTemplate></DataGridTemplateColumn.CellTemplate></DataGridTemplateColumn>
                                     </DataGrid.Columns>
                                 </DataGrid>
