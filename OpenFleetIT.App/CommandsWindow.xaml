@@ -1,0 +1,29 @@
+<Window x:Class="OpenFleetIT.App.CommandsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="OpenFleet IT" Width="700" Height="430" MinWidth="620" MinHeight="390"
+        WindowStartupLocation="CenterOwner" Background="#0D1019" Foreground="{StaticResource TextPrimary}"
+        FontFamily="{StaticResource UiFont}" ResizeMode="NoResize">
+    <Window.Resources>
+        <Style x:Key="LockedCommandButton" TargetType="Button">
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="14" Opacity="0.48"><ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/></Border></ControlTemplate></Setter.Value></Setter>
+        </Style>
+    </Window.Resources>
+    <Grid Margin="28">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <StackPanel>
+            <TextBlock Text="{DynamicResource RemoteCommands}" FontSize="28" FontWeight="SemiBold"/>
+            <TextBlock Text="{DynamicResource RemoteCommandsSubtitle}" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0"/>
+        </StackPanel>
+        <Border Grid.Row="1" Style="{StaticResource GlassCard}" Margin="0,24,0,20" Padding="18" Background="#71151925">
+            <StackPanel><TextBlock Text="{DynamicResource CommandTarget}" Foreground="#77819A" FontSize="10"/><TextBlock x:Name="TargetLabel" Margin="0,8,0,0" FontSize="18" FontWeight="SemiBold"/></StackPanel>
+        </Border>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+            <Button Style="{StaticResource LockedCommandButton}" x:Name="LogOffButton" Content="{DynamicResource LogOff}" Margin="0,0,8,0" Background="#258B7CFF" Foreground="#D7D2FF" BorderBrush="#508B7CFF" FontSize="15" IsEnabled="False"/>
+            <Button Style="{StaticResource LockedCommandButton}" x:Name="ShutdownButton" Grid.Column="1" Content="{DynamicResource ShutDown}" Margin="8,0" Background="#25FFBC66" Foreground="#FFD39A" BorderBrush="#50FFBC66" FontSize="15" IsEnabled="False"/>
+            <Button Style="{StaticResource LockedCommandButton}" x:Name="RebootButton" Grid.Column="2" Content="{DynamicResource Reboot}" Margin="8,0,0,0" Background="#25FF7188" Foreground="#FFA4B3" BorderBrush="#50FF7188" FontSize="15" IsEnabled="False"/>
+        </Grid>
+        <TextBlock x:Name="NoticeLabel" Grid.Row="3" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}" Margin="0,20,0,0"/>
+    </Grid>
+</Window>

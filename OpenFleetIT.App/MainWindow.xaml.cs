@@ -12,6 +12,7 @@ namespace OpenFleetIT.App;
 public partial class MainWindow : Window
 {
     private readonly ObservableCollection<ApplicationItem> _applications = [];
+    private string? _connectedTarget;
 
     public ICollectionView ApplicationsView { get; }
 
@@ -73,6 +74,11 @@ public partial class MainWindow : Window
         new FleetScanWindow { Owner = this }.ShowDialog();
     }
 
+    private void OpenCommands_Click(object sender, RoutedEventArgs e)
+    {
+        new CommandsWindow(_connectedTarget) { Owner = this }.ShowDialog();
+    }
+
     private async void Connect_Click(object sender, RoutedEventArgs e)
     {
         var target = ConnectionTargetInput.Text.Trim();
@@ -119,6 +125,11 @@ public partial class MainWindow : Window
                 false => LocalizationService.Text("NoRestartPending"),
                 null => LocalizationService.Text("InformationUnavailable")
             };
+
+            _connectedTarget = target;
+            DeviceHeaderPanel.Visibility = Visibility.Visible;
+            DeviceSummaryPanel.Visibility = Visibility.Visible;
+            DeviceDetailsPanel.Visibility = Visibility.Visible;
 
             await LoadSoftwareInventoryAsync(target);
         }
