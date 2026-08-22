@@ -13,6 +13,7 @@ public partial class MainWindow : Window
 {
     private readonly ObservableCollection<ApplicationItem> _applications = [];
     public ObservableCollection<WingetUpdate> Updates { get; } = [];
+    public ObservableCollection<InstalledDriver> Drivers { get; } = [];
     private string? _connectedTarget;
 
     public ICollectionView ApplicationsView { get; }
@@ -85,6 +86,35 @@ public partial class MainWindow : Window
 
     private void OpenUpdates_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Updates);
 
+    private void OpenDrivers_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Drivers);
+
+    private async void RefreshDrivers_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_connectedTarget))
+        {
+            DriversStatusLabel.Text = LocalizationService.Text("ConnectBeforeDrivers");
+            return;
+        }
+
+        RefreshDriversButton.IsEnabled = false;
+        DriversStatusLabel.Text = LocalizationService.Text("ReadingDrivers");
+        Drivers.Clear();
+        try
+        {
+            var drivers = await DriverInventoryService.GetAsync(_connectedTarget);
+            foreach (var driver in drivers) Drivers.Add(driver);
+            DriversStatusLabel.Text = string.Format(LocalizationService.Text("DriversFoundFormat"), Drivers.Count, _connectedTarget);
+        }
+        catch (Exception exception)
+        {
+            DriversStatusLabel.Text = string.Format(LocalizationService.Text("DriversErrorFormat"), exception.Message);
+        }
+        finally
+        {
+            RefreshDriversButton.IsEnabled = true;
+        }
+    }
+
     private async void CheckSoftwareUpdates_Click(object sender, RoutedEventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_connectedTarget))
@@ -130,6 +160,7 @@ public partial class MainWindow : Window
         FleetPanel.Visibility = page == CentralPage.Fleet ? Visibility.Visible : Visibility.Collapsed;
         SettingsPanel.Visibility = page == CentralPage.Settings ? Visibility.Visible : Visibility.Collapsed;
         UpdatesPanel.Visibility = page == CentralPage.Updates ? Visibility.Visible : Visibility.Collapsed;
+        DriversPanel.Visibility = page == CentralPage.Drivers ? Visibility.Visible : Visibility.Collapsed;
         var deviceVisibility = page == CentralPage.Workstation && !string.IsNullOrWhiteSpace(_connectedTarget)
             ? Visibility.Visible
             : Visibility.Collapsed;
@@ -188,7 +219,7 @@ public partial class MainWindow : Window
             _connectedTarget = target;
             if (CommandsPanel.Visibility == Visibility.Visible)
                 CommandTargetLabel.Text = target;
-            else if (FleetPanel.Visibility != Visibility.Visible && SettingsPanel.Visibility != Visibility.Visible && UpdatesPanel.Visibility != Visibility.Visible)
+            else if (FleetPanel.Visibility != Visibility.Visible && SettingsPanel.Visibility != Visibility.Visible && UpdatesPanel.Visibility != Visibility.Visible && DriversPanel.Visibility != Visibility.Visible)
                 ShowCentralPanel(CentralPage.Workstation);
 
             await LoadSoftwareInventoryAsync(target);
@@ -289,7 +320,8 @@ internal enum CentralPage
     Commands,
     Fleet,
     Settings,
-    Updates
+    Updates,
+    Drivers
 }
 
 public sealed record ApplicationItem(string Name, string Publisher, string Version, string StatusResourceKey,

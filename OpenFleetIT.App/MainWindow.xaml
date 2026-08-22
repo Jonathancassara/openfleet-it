@@ -36,6 +36,7 @@
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Applications}" Tag="&#xF8A5;"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Updates}" Tag="&#xE895;" Click="OpenUpdates_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Security}" Tag="&#xE72E;"/>
+                        <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Drivers}" Tag="&#xE950;" Click="OpenDrivers_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Commands}" Tag="&#xE756;" Click="OpenCommands_Click"/>
                         <TextBlock Text="{DynamicResource Administration}" FontSize="10" FontWeight="SemiBold" Foreground="#77819A" Margin="14,24,0,9"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource ItFleet}" Tag="&#xE950;" Click="OpenFleetScan_Click"/>
@@ -187,6 +188,34 @@
                                     <DataGridTextColumn Header="{DynamicResource InstalledVersion}" Binding="{Binding InstalledVersion}" Width="0.8*"/>
                                     <DataGridTextColumn Header="{DynamicResource AvailableVersion}" Binding="{Binding AvailableVersion}" Width="0.8*"/>
                                     <DataGridTextColumn Header="{DynamicResource Source}" Binding="{Binding Source}" Width="0.6*"/>
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Border>
+                    </Grid>
+                    <Grid x:Name="DriversPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Grid>
+                            <StackPanel><TextBlock Text="{DynamicResource InstalledDevices}" FontSize="28" FontWeight="SemiBold"/><TextBlock Text="{DynamicResource DriversSubtitle}" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0"/></StackPanel>
+                            <Button x:Name="RefreshDriversButton" HorizontalAlignment="Right" VerticalAlignment="Center" Content="{DynamicResource Refresh}" Padding="18,10" Background="#338B7CFF" Foreground="White" BorderBrush="#558B7CFF" Click="RefreshDrivers_Click" Cursor="Hand"/>
+                        </Grid>
+                        <Border Grid.Row="1" Background="#12FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1" CornerRadius="14" Padding="14" Margin="0,22,0,16">
+                            <TextBlock x:Name="DriversStatusLabel" Text="{DynamicResource DriversNotLoaded}" Foreground="{StaticResource TextSecondary}"/>
+                        </Border>
+                        <Border Grid.Row="2" Style="{StaticResource GlassCard}" Padding="18" Background="#71151925">
+                            <DataGrid ItemsSource="{Binding Drivers}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" Background="Transparent" Foreground="White" BorderThickness="0" GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#14FFFFFF" RowHeaderWidth="0" RowHeight="48" ColumnHeaderHeight="36">
+                                <DataGrid.Resources>
+                                    <Style TargetType="DataGridColumnHeader"><Setter Property="Background" Value="#151A27"/><Setter Property="Foreground" Value="#8E98B1"/><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="10,0"/><Setter Property="FontSize" Value="9"/><Setter Property="FontWeight" Value="SemiBold"/></Style>
+                                    <Style TargetType="DataGridRow"><Setter Property="Background" Value="Transparent"/><Style.Triggers><Trigger Property="IsMouseOver" Value="True"><Setter Property="Background" Value="#12FFFFFF"/></Trigger><Trigger Property="IsSelected" Value="True"><Setter Property="Background" Value="#238B7CFF"/></Trigger></Style.Triggers></Style>
+                                    <Style TargetType="DataGridCell"><Setter Property="BorderThickness" Value="0"/><Setter Property="Padding" Value="10,0"/><Setter Property="VerticalContentAlignment" Value="Center"/></Style>
+                                </DataGrid.Resources>
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="{DynamicResource Device}" Binding="{Binding Name}" Width="1.6*"/>
+                                    <DataGridTextColumn Header="{DynamicResource DeviceClass}" Binding="{Binding DeviceClass}" Width="0.8*"/>
+                                    <DataGridTextColumn Header="{DynamicResource Manufacturer}" Binding="{Binding Manufacturer}" Width="1*"/>
+                                    <DataGridTextColumn Header="{DynamicResource DriverVersion}" Binding="{Binding Version}" Width="0.9*"/>
+                                    <DataGridTextColumn Header="{DynamicResource DriverDate}" Binding="{Binding DriverDateDisplay}" Width="0.7*"/>
+                                    <DataGridTextColumn Header="INF" Binding="{Binding InfName}" Width="0.65*"/>
+                                    <DataGridTextColumn Header="{DynamicResource Signature}" Binding="{Binding Signature}" Width="0.65*"/>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Border>

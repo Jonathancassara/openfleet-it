@@ -14,6 +14,7 @@
 - [x] Mark repair and uninstall capabilities from authoritative registry values.
 - [ ] Add Microsoft Store/MSIX package inventory.
 - [x] Add read-only update availability detection through WinGet with graceful unavailable/error states.
+- [x] Add installed Plug-and-Play device and driver-version inventory through WMI.
 - [ ] Add automated parser tests against representative WinGet outputs.
 - [ ] Add tests for malformed, duplicate and incomplete registry entries.
 
