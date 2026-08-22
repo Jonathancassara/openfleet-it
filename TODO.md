@@ -35,6 +35,7 @@
 - [ ] Keep remote inventory read-only by default.
 - [ ] Document WMI, Remote Registry and firewall prerequisites.
 - [ ] Design a signed OpenFleet agent or constrained WinRM transport.
+- [x] Add an optional, user-supplied PsExec connection probe without credential storage or tool redistribution.
 - [ ] Add mutual authentication and certificate rotation.
 - [ ] Add role-based access control and per-action authorization.
 - [ ] Add remote operation audit trails.

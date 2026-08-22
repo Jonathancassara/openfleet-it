@@ -84,6 +84,54 @@ public partial class MainWindow : Window
             : _connectedTarget;
     }
 
+    private void BrowsePsExec_Click(object sender, RoutedEventArgs e)
+    {
+        var dialog = new Microsoft.Win32.OpenFileDialog
+        {
+            Title = LocalizationService.Text("SelectPsExec"),
+            Filter = "PsExec (PsExec.exe)|PsExec.exe|Executable (*.exe)|*.exe",
+            CheckFileExists = true,
+            Multiselect = false
+        };
+        if (dialog.ShowDialog(this) == true)
+        {
+            PsExecPathInput.Text = dialog.FileName;
+            PsExecStatusLabel.Text = LocalizationService.Text("PsExecReadyToTest");
+        }
+    }
+
+    private async void TestPsExec_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_connectedTarget))
+        {
+            PsExecStatusLabel.Text = LocalizationService.Text("NoConnectedDevice");
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(PsExecPathInput.Text))
+        {
+            PsExecStatusLabel.Text = LocalizationService.Text("SelectPsExecFirst");
+            return;
+        }
+
+        var confirmation = MessageBox.Show(
+            string.Format(LocalizationService.Text("PsExecProbeConfirmation"), _connectedTarget),
+            LocalizationService.Text("PsExecConnector"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (confirmation != MessageBoxResult.Yes) return;
+
+        TestPsExecButton.IsEnabled = false;
+        PsExecStatusLabel.Text = LocalizationService.Text("TestingPsExec");
+        try
+        {
+            var result = await PsExecConnectorService.TestAsync(PsExecPathInput.Text, _connectedTarget);
+            PsExecStatusLabel.Foreground = result.Success ? (Brush)FindResource("Success") : (Brush)FindResource("Danger");
+            PsExecStatusLabel.Text = result.Details;
+        }
+        finally
+        {
+            TestPsExecButton.IsEnabled = true;
+        }
+    }
+
     private void OpenUpdates_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Updates);
 
     private void OpenDrivers_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Drivers);

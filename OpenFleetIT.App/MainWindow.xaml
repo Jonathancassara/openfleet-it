@@ -141,7 +141,7 @@
                         </Border>
                     </Grid>
                     <Grid x:Name="CommandsPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0">
-                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="220"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="180"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                         <StackPanel>
                             <TextBlock Text="{DynamicResource RemoteCommands}" FontSize="28" FontWeight="SemiBold"/>
                             <TextBlock Text="{DynamicResource RemoteCommandsSubtitle}" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0"/>
@@ -162,6 +162,18 @@
                         </Grid>
                         <Border Grid.Row="3" Background="#12FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1" CornerRadius="14" Padding="16" Margin="0,20,0,0">
                             <TextBlock Text="{DynamicResource CommandSafetyNotice}" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}"/>
+                        </Border>
+                        <Border Grid.Row="4" Style="{StaticResource GlassCard}" Padding="18" Margin="0,18,0,0" Background="#71151925">
+                            <Grid>
+                                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                                <StackPanel><TextBlock Text="{DynamicResource PsExecConnector}" FontSize="17" FontWeight="SemiBold"/><TextBlock Text="{DynamicResource PsExecConnectorHelp}" Foreground="{StaticResource TextSecondary}" FontSize="11" Margin="0,5,0,0" TextWrapping="Wrap"/></StackPanel>
+                                <Grid Grid.Row="1" Margin="0,14,0,0"><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                    <TextBox x:Name="PsExecPathInput" Height="38" Padding="11,0" VerticalContentAlignment="Center" Background="#18FFFFFF" BorderBrush="#30FFFFFF" Foreground="White" CaretBrush="White" IsReadOnly="True"/>
+                                    <Button Grid.Column="1" Content="{DynamicResource Browse}" Padding="16,8" Margin="9,0,0,0" Background="#20FFFFFF" Foreground="White" BorderBrush="#30FFFFFF" Click="BrowsePsExec_Click"/>
+                                    <Button x:Name="TestPsExecButton" Grid.Column="2" Content="{DynamicResource TestConnection}" Padding="16,8" Margin="9,0,0,0" Background="#338B7CFF" Foreground="White" BorderBrush="#558B7CFF" Click="TestPsExec_Click"/>
+                                </Grid>
+                                <TextBlock x:Name="PsExecStatusLabel" Grid.Row="2" Text="{DynamicResource PsExecNotConfigured}" Foreground="{StaticResource TextSecondary}" Margin="0,12,0,0" TextWrapping="Wrap"/>
+                            </Grid>
                         </Border>
                     </Grid>
                     <local:FleetScanWindow x:Name="FleetPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0"/>
