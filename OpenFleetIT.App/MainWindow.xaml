@@ -31,7 +31,7 @@
                     </StackPanel>
                     <StackPanel Grid.Row="1">
                         <TextBlock Text="{DynamicResource Workspace}" FontSize="10" FontWeight="SemiBold" Foreground="#77819A" Margin="14,0,0,9"/>
-                        <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Workstation}" Tag="&#xE7F8;" IsChecked="True"/>
+                        <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Workstation}" Tag="&#xE7F8;" IsChecked="True" Click="OpenWorkstation_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Applications}" Tag="&#xF8A5;"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Updates}" Tag="&#xE895;"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Security}" Tag="&#xE72E;"/>
@@ -136,6 +136,30 @@
                                     <Border Padding="0,12"><Grid><Ellipse Width="8" Height="8" Fill="#8B7CFF" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="2,4,0,0"/><StackPanel Margin="20,0,0,0"><TextBlock Text="{DynamicResource PolicyUpdated}" FontSize="11" FontWeight="SemiBold"/><TextBlock Text="{DynamicResource PolicyDetails}" Foreground="{StaticResource TextSecondary}" FontSize="9" Margin="0,4,0,0"/></StackPanel></Grid></Border>
                                 </StackPanel>
                             </Grid>
+                        </Border>
+                    </Grid>
+                    <Grid x:Name="CommandsPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0">
+                        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="220"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="{DynamicResource RemoteCommands}" FontSize="28" FontWeight="SemiBold"/>
+                            <TextBlock Text="{DynamicResource RemoteCommandsSubtitle}" Foreground="{StaticResource TextSecondary}" Margin="0,6,0,0"/>
+                        </StackPanel>
+                        <Border Grid.Row="1" Style="{StaticResource GlassCard}" Margin="0,24,0,20" Padding="18" Background="#71151925">
+                            <StackPanel><TextBlock Text="{DynamicResource CommandTarget}" Foreground="#77819A" FontSize="10"/><TextBlock x:Name="CommandTargetLabel" Margin="0,8,0,0" FontSize="18" FontWeight="SemiBold"/></StackPanel>
+                        </Border>
+                        <Grid Grid.Row="2">
+                            <Grid.Resources>
+                                <Style x:Key="LockedCommandButton" TargetType="Button">
+                                    <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="Button"><Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="1" CornerRadius="18" Opacity="0.48"><StackPanel HorizontalAlignment="Center" VerticalAlignment="Center"><TextBlock Text="{TemplateBinding Tag}" FontFamily="{StaticResource IconFont}" FontSize="30" HorizontalAlignment="Center" Margin="0,0,0,14"/><ContentPresenter HorizontalAlignment="Center"/></StackPanel></Border></ControlTemplate></Setter.Value></Setter>
+                                </Style>
+                            </Grid.Resources>
+                            <Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions>
+                            <Button Style="{StaticResource LockedCommandButton}" Content="{DynamicResource LogOff}" Tag="&#xE8AC;" Margin="0,0,10,0" Background="#258B7CFF" Foreground="#D7D2FF" BorderBrush="#508B7CFF" FontSize="16" IsEnabled="False"/>
+                            <Button Style="{StaticResource LockedCommandButton}" Grid.Column="1" Content="{DynamicResource ShutDown}" Tag="&#xE7E8;" Margin="10,0" Background="#25FFBC66" Foreground="#FFD39A" BorderBrush="#50FFBC66" FontSize="16" IsEnabled="False"/>
+                            <Button Style="{StaticResource LockedCommandButton}" Grid.Column="2" Content="{DynamicResource Reboot}" Tag="&#xE777;" Margin="10,0,0,0" Background="#25FF7188" Foreground="#FFA4B3" BorderBrush="#50FF7188" FontSize="16" IsEnabled="False"/>
+                        </Grid>
+                        <Border Grid.Row="3" Background="#12FFFFFF" BorderBrush="#22FFFFFF" BorderThickness="1" CornerRadius="14" Padding="16" Margin="0,20,0,0">
+                            <TextBlock Text="{DynamicResource CommandSafetyNotice}" TextWrapping="Wrap" Foreground="{StaticResource TextSecondary}"/>
                         </Border>
                     </Grid>
                 </Grid>

@@ -76,7 +76,23 @@ public partial class MainWindow : Window
 
     private void OpenCommands_Click(object sender, RoutedEventArgs e)
     {
-        new CommandsWindow(_connectedTarget) { Owner = this }.ShowDialog();
+        ShowCentralPanel(commands: true);
+        CommandTargetLabel.Text = string.IsNullOrWhiteSpace(_connectedTarget)
+            ? LocalizationService.Text("NoConnectedDevice")
+            : _connectedTarget;
+    }
+
+    private void OpenWorkstation_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(commands: false);
+
+    private void ShowCentralPanel(bool commands)
+    {
+        CommandsPanel.Visibility = commands ? Visibility.Visible : Visibility.Collapsed;
+        var deviceVisibility = !commands && !string.IsNullOrWhiteSpace(_connectedTarget)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
+        DeviceHeaderPanel.Visibility = deviceVisibility;
+        DeviceSummaryPanel.Visibility = deviceVisibility;
+        DeviceDetailsPanel.Visibility = deviceVisibility;
     }
 
     private async void Connect_Click(object sender, RoutedEventArgs e)
@@ -127,9 +143,10 @@ public partial class MainWindow : Window
             };
 
             _connectedTarget = target;
-            DeviceHeaderPanel.Visibility = Visibility.Visible;
-            DeviceSummaryPanel.Visibility = Visibility.Visible;
-            DeviceDetailsPanel.Visibility = Visibility.Visible;
+            if (CommandsPanel.Visibility == Visibility.Visible)
+                CommandTargetLabel.Text = target;
+            else
+                ShowCentralPanel(commands: false);
 
             await LoadSoftwareInventoryAsync(target);
         }
