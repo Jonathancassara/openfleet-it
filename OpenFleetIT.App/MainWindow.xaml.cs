@@ -12,6 +12,7 @@ namespace OpenFleetIT.App;
 public partial class MainWindow : Window
 {
     private readonly ObservableCollection<ApplicationItem> _applications = [];
+    public ObservableCollection<WingetUpdate> Updates { get; } = [];
     private string? _connectedTarget;
 
     public ICollectionView ApplicationsView { get; }
@@ -82,6 +83,45 @@ public partial class MainWindow : Window
             : _connectedTarget;
     }
 
+    private void OpenUpdates_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Updates);
+
+    private async void CheckSoftwareUpdates_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_connectedTarget))
+        {
+            UpdatesStatusLabel.Text = LocalizationService.Text("ConnectBeforeUpdates");
+            return;
+        }
+
+        if (!IsLocalTarget(_connectedTarget))
+        {
+            UpdatesStatusLabel.Text = LocalizationService.Text("RemoteUpdatesUnavailable");
+            return;
+        }
+
+        CheckSoftwareUpdatesButton.IsEnabled = false;
+        UpdatesStatusLabel.Text = LocalizationService.Text("CheckingSoftwareUpdates");
+        Updates.Clear();
+        try
+        {
+            var result = await WingetUpdateService.GetAvailableUpdatesAsync();
+            if (!result.IsWingetAvailable)
+            {
+                UpdatesStatusLabel.Text = LocalizationService.Text("WingetUnavailable");
+                return;
+            }
+
+            foreach (var update in result.Updates) Updates.Add(update);
+            UpdatesStatusLabel.Text = result.Error is not null
+                ? string.Format(LocalizationService.Text("WingetErrorFormat"), result.Error)
+                : string.Format(LocalizationService.Text("UpdatesFoundFormat"), Updates.Count);
+        }
+        finally
+        {
+            CheckSoftwareUpdatesButton.IsEnabled = true;
+        }
+    }
+
     private void OpenWorkstation_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Workstation);
 
     private void ShowCentralPanel(CentralPage page)
@@ -89,6 +129,7 @@ public partial class MainWindow : Window
         CommandsPanel.Visibility = page == CentralPage.Commands ? Visibility.Visible : Visibility.Collapsed;
         FleetPanel.Visibility = page == CentralPage.Fleet ? Visibility.Visible : Visibility.Collapsed;
         SettingsPanel.Visibility = page == CentralPage.Settings ? Visibility.Visible : Visibility.Collapsed;
+        UpdatesPanel.Visibility = page == CentralPage.Updates ? Visibility.Visible : Visibility.Collapsed;
         var deviceVisibility = page == CentralPage.Workstation && !string.IsNullOrWhiteSpace(_connectedTarget)
             ? Visibility.Visible
             : Visibility.Collapsed;
@@ -147,7 +188,7 @@ public partial class MainWindow : Window
             _connectedTarget = target;
             if (CommandsPanel.Visibility == Visibility.Visible)
                 CommandTargetLabel.Text = target;
-            else if (FleetPanel.Visibility != Visibility.Visible && SettingsPanel.Visibility != Visibility.Visible)
+            else if (FleetPanel.Visibility != Visibility.Visible && SettingsPanel.Visibility != Visibility.Visible && UpdatesPanel.Visibility != Visibility.Visible)
                 ShowCentralPanel(CentralPage.Workstation);
 
             await LoadSoftwareInventoryAsync(target);
@@ -221,6 +262,10 @@ public partial class MainWindow : Window
     private void Close_Click(object sender, RoutedEventArgs e) => Close();
     private void ToggleMaximize() => WindowState = WindowState == WindowState.Maximized ? WindowState.Normal : WindowState.Maximized;
 
+    private static bool IsLocalTarget(string target) => target.Equals("localhost", StringComparison.OrdinalIgnoreCase)
+        || target.Equals(Environment.MachineName, StringComparison.OrdinalIgnoreCase)
+        || target is "127.0.0.1" or "::1" or ".";
+
     private void EnableSystemBackdrop()
     {
         if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000)) return;
@@ -243,7 +288,8 @@ internal enum CentralPage
     Workstation,
     Commands,
     Fleet,
-    Settings
+    Settings,
+    Updates
 }
 
 public sealed record ApplicationItem(string Name, string Publisher, string Version, string StatusResourceKey,

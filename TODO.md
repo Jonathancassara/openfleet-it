@@ -13,7 +13,8 @@
 - [x] Read current-user application entries for local inventory.
 - [x] Mark repair and uninstall capabilities from authoritative registry values.
 - [ ] Add Microsoft Store/MSIX package inventory.
-- [ ] Add reliable update availability detection through WinGet.
+- [x] Add read-only update availability detection through WinGet with graceful unavailable/error states.
+- [ ] Add automated parser tests against representative WinGet outputs.
 - [ ] Add tests for malformed, duplicate and incomplete registry entries.
 
 ## Phase 2 — Safe local software operations
