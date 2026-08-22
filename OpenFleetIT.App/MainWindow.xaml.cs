@@ -11,15 +11,7 @@ namespace OpenFleetIT.App;
 
 public partial class MainWindow : Window
 {
-    private readonly ObservableCollection<ApplicationItem> _applications =
-    [
-        new("Microsoft 365 Apps", "Microsoft Corporation", "16.0.19127.20264", "UpToDate", "#2457D7A3", "#FF57D7A3"),
-        new("Google Chrome", "Google LLC", "140.0.7339.81", "UpdateAvailable", "#24FFBC66", "#FFFFBC66"),
-        new("7-Zip", "Igor Pavlov", "24.09", "UpToDate", "#2457D7A3", "#FF57D7A3"),
-        new("VLC media player", "VideoLAN", "3.0.21", "RepairSuggested", "#248B7CFF", "#FFA99CFF"),
-        new("Microsoft Teams", "Microsoft Corporation", "25193.1707.3773.5286", "UpToDate", "#2457D7A3", "#FF57D7A3"),
-        new("Adobe Acrobat Reader", "Adobe", "25.001.20672", "UpdateAvailable", "#24FFBC66", "#FFFFBC66")
-    ];
+    private readonly ObservableCollection<ApplicationItem> _applications = [];
 
     public ICollectionView ApplicationsView { get; }
 
@@ -127,6 +119,8 @@ public partial class MainWindow : Window
                 false => LocalizationService.Text("NoRestartPending"),
                 null => LocalizationService.Text("InformationUnavailable")
             };
+
+            await LoadSoftwareInventoryAsync(target);
         }
         catch (Exception exception)
         {
@@ -140,6 +134,43 @@ public partial class MainWindow : Window
         finally
         {
             ConnectButton.IsEnabled = true;
+        }
+    }
+
+    private async void RefreshInventory_Click(object sender, RoutedEventArgs e)
+    {
+        var target = ConnectionTargetInput.Text.Trim();
+        if (!string.IsNullOrWhiteSpace(target))
+            await LoadSoftwareInventoryAsync(target);
+    }
+
+    private async Task LoadSoftwareInventoryAsync(string target)
+    {
+        InventoryCountLabel.Text = LocalizationService.Text("InventoryLoading");
+        try
+        {
+            var packages = await SoftwareInventoryService.GetAsync(target);
+            _applications.Clear();
+            foreach (var package in packages)
+            {
+                _applications.Add(new ApplicationItem(
+                    package.Name,
+                    package.Publisher,
+                    package.Version,
+                    "Installed",
+                    "#2457D7A3",
+                    "#FF57D7A3",
+                    package.CanRepair,
+                    false,
+                    package.CanUninstall));
+            }
+
+            InventoryCountLabel.Text = string.Format(LocalizationService.Text("InventoryCountFormat"), packages.Count);
+        }
+        catch
+        {
+            _applications.Clear();
+            InventoryCountLabel.Text = LocalizationService.Text("InventoryUnavailable");
         }
     }
 
@@ -178,7 +209,7 @@ public partial class MainWindow : Window
 }
 
 public sealed record ApplicationItem(string Name, string Publisher, string Version, string StatusResourceKey,
-    string StatusBackgroundHex, string StatusForegroundHex)
+    string StatusBackgroundHex, string StatusForegroundHex, bool CanRepair, bool CanUpdate, bool CanUninstall)
 {
     public string Status => LocalizationService.Text(StatusResourceKey);
     public Brush StatusBackground => new SolidColorBrush((Color)ColorConverter.ConvertFromString(StatusBackgroundHex));
