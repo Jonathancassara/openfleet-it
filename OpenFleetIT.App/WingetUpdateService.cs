@@ -9,7 +9,7 @@ public static partial class WingetUpdateService
 {
     public static async Task<WingetUpdateResult> GetAvailableUpdatesAsync(CancellationToken cancellationToken = default)
     {
-        var executable = ResolveExecutable();
+        var executable = FindExecutable();
         if (executable is null)
             return new WingetUpdateResult(false, [], "WinGet is not installed or its application execution alias is disabled.");
 
@@ -54,7 +54,7 @@ public static partial class WingetUpdateService
         }
     }
 
-    internal static IReadOnlyList<WingetUpdate> Parse(string output)
+    public static IReadOnlyList<WingetUpdate> Parse(string output)
     {
         var lines = AnsiEscapePattern().Replace(output, string.Empty)
             .Replace("\r", string.Empty, StringComparison.Ordinal)
@@ -92,7 +92,7 @@ public static partial class WingetUpdateService
             .ToArray();
     }
 
-    private static string? ResolveExecutable()
+    public static string? FindExecutable()
     {
         var alias = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
             "Microsoft", "WindowsApps", "winget.exe");

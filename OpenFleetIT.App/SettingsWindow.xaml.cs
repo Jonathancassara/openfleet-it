@@ -49,14 +49,22 @@ public partial class SettingsWindow : UserControl
     private async void Save_Click(object sender, RoutedEventArgs e)
     {
         await SettingsStore.SaveAsync(new OpenFleetSettings { DomainSuffixes = [.. _suffixes], Language = _selectedLanguage });
+        await ActionLogService.AppendAsync("Configuration", "localhost", "Save settings", "Success",
+            $"Language={_selectedLanguage}; DnsSuffixCount={_suffixes.Count}");
         SaveStatus.Text = LocalizationService.Text("SettingsSaved");
     }
 
     private async void CheckUpdate_Click(object sender, RoutedEventArgs e)
     {
         UpdateStatus.Text = LocalizationService.Text("CheckingUpdates");
-        await Task.Delay(650);
-        UpdateStatus.Text = LocalizationService.Text("NoUpdates");
+        var result = await OpenFleetUpdateService.CheckAsync();
+        UpdateStatus.Text = result.Error is not null
+            ? string.Format(LocalizationService.Text("UpdateCheckErrorFormat"), result.Error)
+            : result.UpdateAvailable
+                ? string.Format(LocalizationService.Text("OpenFleetUpdateAvailableFormat"), result.LatestVersion)
+                : LocalizationService.Text("NoUpdates");
+        await ActionLogService.AppendAsync("Update", "OpenFleet IT", "Check application update",
+            result.Error is null ? "Success" : "Error", result.Error ?? $"Latest={result.LatestVersion ?? OpenFleetUpdateService.CurrentVersion}");
     }
 
     private void LanguageSelector_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)

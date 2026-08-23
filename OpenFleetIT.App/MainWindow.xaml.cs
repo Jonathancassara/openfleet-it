@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Data;
@@ -14,7 +15,9 @@ public partial class MainWindow : Window
     private readonly ObservableCollection<ApplicationItem> _applications = [];
     public ObservableCollection<WingetUpdate> Updates { get; } = [];
     public ObservableCollection<InstalledDriver> Drivers { get; } = [];
+    public ObservableCollection<ActionLogEntry> ActionEntries { get; } = [];
     private string? _connectedTarget;
+    private PcInformation? _lastPcInformation;
 
     public ICollectionView ApplicationsView { get; }
 
@@ -31,8 +34,15 @@ public partial class MainWindow : Window
     private void SearchBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
     {
         if (ApplicationsView is null) return;
+        ApplyApplicationFilter(SearchBox.Text);
+    }
 
-        var query = SearchBox.Text.Trim();
+    private void ApplicationsSearch_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) =>
+        ApplyApplicationFilter(ApplicationsSearchInput.Text);
+
+    private void ApplyApplicationFilter(string text)
+    {
+        var query = text.Trim();
         ApplicationsView.Filter = item =>
         {
             if (string.IsNullOrWhiteSpace(query)) return true;
@@ -44,24 +54,55 @@ public partial class MainWindow : Window
         };
     }
 
-    private void AppAction_Click(object sender, RoutedEventArgs e)
+    private void OpenApplications_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Applications);
+
+    private void OpenSecurity_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Security);
+
+    private async void OpenActionLog_Click(object sender, RoutedEventArgs e)
+    {
+        ShowCentralPanel(CentralPage.ActionLog);
+        await LoadActionLogAsync();
+    }
+
+    private async void RefreshActionLog_Click(object sender, RoutedEventArgs e) => await LoadActionLogAsync();
+
+    private async Task LoadActionLogAsync()
+    {
+        ActionEntries.Clear();
+        var entries = await ActionLogService.ReadAsync();
+        foreach (var entry in entries.OrderByDescending(item => item.Timestamp)) ActionEntries.Add(entry);
+        ActionLogStatusLabel.Text = entries.Count == 0
+            ? LocalizationService.Text("ActionLogEmpty")
+            : string.Format(LocalizationService.Text("ActionLogCountFormat"), entries.Count,
+                entries.All(entry => entry.IntegrityValid) ? LocalizationService.Text("Verified") : LocalizationService.Text("Invalid"));
+    }
+
+    private async void AppAction_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not System.Windows.Controls.Button button || button.DataContext is not ApplicationItem application)
             return;
 
-        var actionKey = button.Tag?.ToString() switch
+        if (string.IsNullOrWhiteSpace(_connectedTarget) || !IsLocalTarget(_connectedTarget))
         {
-            "Repair" => "Repair",
-            "Update" => "Update",
-            "Uninstall" => "Uninstall",
-            _ => "Actions"
-        };
+            MessageBox.Show(LocalizationService.Text("LocalSoftwareActionsOnly"), LocalizationService.Text("ActionBlocked"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
 
-        MessageBox.Show(
-            string.Format(LocalizationService.Text("ActionDemoMessage"), LocalizationService.Text(actionKey), application.Name),
-            LocalizationService.Text("ActionDemoTitle"),
-            MessageBoxButton.OK,
-            MessageBoxImage.Information);
+        var repair = button.Tag?.ToString() == "Repair";
+        var actionKey = repair ? "Repair" : "Uninstall";
+        if (string.IsNullOrWhiteSpace(application.ProductCode)) return;
+        var preview = SoftwareActionService.PreviewMsi(application.ProductCode, repair);
+        if (MessageBox.Show(string.Format(LocalizationService.Text("SoftwareActionConfirmation"), LocalizationService.Text(actionKey), application.Name, preview),
+                LocalizationService.Text("ConfirmAction"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+
+        button.IsEnabled = false;
+        var result = await SoftwareActionService.ExecuteMsiAsync(application.ProductCode, repair);
+        await SafeLogAsync("Software", _connectedTarget, $"{actionKey} {application.Name}", result.Success ? "Success" : "Error",
+            $"ExitCode={result.ExitCode}; {result.Details}");
+        MessageBox.Show(string.Format(LocalizationService.Text("ActionResultFormat"), result.Success ? LocalizationService.Text("ActionSucceeded") : LocalizationService.Text("ActionFailed"), result.ExitCode, result.Details),
+            LocalizationService.Text("ActionResult"), MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
+        button.IsEnabled = true;
+        if (result.Success) await LoadSoftwareInventoryAsync(_connectedTarget);
     }
 
     private void OpenSettings_Click(object sender, RoutedEventArgs e)
@@ -82,6 +123,62 @@ public partial class MainWindow : Window
         CommandTargetLabel.Text = string.IsNullOrWhiteSpace(_connectedTarget)
             ? LocalizationService.Text("NoConnectedDevice")
             : _connectedTarget;
+        var connected = !string.IsNullOrWhiteSpace(_connectedTarget);
+        LogOffCommandButton.IsEnabled = connected && IsLocalTarget(_connectedTarget!);
+        ShutdownCommandButton.IsEnabled = connected;
+        RebootCommandButton.IsEnabled = connected;
+    }
+
+    private async void WingetUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button || button.DataContext is not WingetUpdate update
+            || string.IsNullOrWhiteSpace(_connectedTarget) || !IsLocalTarget(_connectedTarget)) return;
+        var executable = WingetUpdateService.FindExecutable();
+        if (executable is null)
+        {
+            MessageBox.Show(LocalizationService.Text("WingetUnavailable"), LocalizationService.Text("ActionBlocked"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        var preview = SoftwareActionService.PreviewWinget(update.Id);
+        if (MessageBox.Show(string.Format(LocalizationService.Text("SoftwareActionConfirmation"), LocalizationService.Text("Update"), update.Name, preview),
+                LocalizationService.Text("ConfirmAction"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        button.IsEnabled = false;
+        var result = await SoftwareActionService.ExecuteWingetAsync(executable, update.Id);
+        await SafeLogAsync("Software", _connectedTarget, $"Update {update.Id}", result.Success ? "Success" : "Error",
+            $"ExitCode={result.ExitCode}; {result.Details}");
+        MessageBox.Show(string.Format(LocalizationService.Text("ActionResultFormat"), result.Success ? LocalizationService.Text("ActionSucceeded") : LocalizationService.Text("ActionFailed"), result.ExitCode, result.Details),
+            LocalizationService.Text("ActionResult"), MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
+        button.IsEnabled = true;
+        if (result.Success) CheckSoftwareUpdates_Click(CheckSoftwareUpdatesButton, new RoutedEventArgs());
+    }
+
+    private async void PowerCommand_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not System.Windows.Controls.Button button || string.IsNullOrWhiteSpace(_connectedTarget)) return;
+        var action = button.Name switch
+        {
+            "LogOffCommandButton" => PowerAction.LogOff,
+            "ShutdownCommandButton" => PowerAction.Shutdown,
+            "RebootCommandButton" => PowerAction.Reboot,
+            _ => PowerAction.Abort
+        };
+        var actionName = LocalizationService.Text(action switch
+        {
+            PowerAction.LogOff => "LogOff",
+            PowerAction.Shutdown => "ShutDown",
+            PowerAction.Reboot => "Reboot",
+            _ => "CancelScheduled"
+        });
+        if (action != PowerAction.Abort && MessageBox.Show(
+                string.Format(LocalizationService.Text("PowerActionConfirmation"), actionName, _connectedTarget),
+                LocalizationService.Text("ConfirmAction"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        button.IsEnabled = false;
+        var result = await SoftwareActionService.ExecutePowerCommandAsync(_connectedTarget, action);
+        await SafeLogAsync("Power", _connectedTarget, action.ToString(), result.Success ? "Success" : "Error",
+            $"ExitCode={result.ExitCode}; {result.Details}");
+        MessageBox.Show(string.Format(LocalizationService.Text("ActionResultFormat"), result.Success ? LocalizationService.Text("ActionSucceeded") : LocalizationService.Text("ActionFailed"), result.ExitCode, result.Details),
+            LocalizationService.Text("ActionResult"), MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
+        button.IsEnabled = true;
     }
 
     private void BrowsePsExec_Click(object sender, RoutedEventArgs e)
@@ -125,6 +222,7 @@ public partial class MainWindow : Window
             var result = await PsExecConnectorService.TestAsync(PsExecPathInput.Text, _connectedTarget);
             PsExecStatusLabel.Foreground = result.Success ? (Brush)FindResource("Success") : (Brush)FindResource("Danger");
             PsExecStatusLabel.Text = result.Details;
+            await SafeLogAsync("Remote", _connectedTarget, "PsExec probe", result.Success ? "Success" : "Error", result.Details);
         }
         finally
         {
@@ -135,6 +233,42 @@ public partial class MainWindow : Window
     private void OpenUpdates_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Updates);
 
     private void OpenDrivers_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Drivers);
+
+    private async void RefreshSecurity_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_connectedTarget))
+        {
+            SecurityStatusLabel.Text = LocalizationService.Text("ConnectBeforeSecurity");
+            return;
+        }
+
+        RefreshSecurityButton.IsEnabled = false;
+        SecurityStatusLabel.Text = LocalizationService.Text("ReadingSecurity");
+        try
+        {
+            var snapshot = await SecurityInventoryService.GetAsync(_connectedTarget);
+            DefenderValue.Text = FormatState(snapshot.DefenderEnabled);
+            DefenderDetail.Text = snapshot.SignatureAgeDays is int age
+                ? string.Format(LocalizationService.Text("SignatureAgeFormat"), age)
+                : LocalizationService.Text("InformationUnavailable");
+            BitLockerValue.Text = FormatState(snapshot.BitLockerProtected);
+            TpmValue.Text = snapshot.TpmPresent == false ? LocalizationService.Text("NotPresent") : FormatState(snapshot.TpmEnabled);
+            SecureBootValue.Text = FormatState(snapshot.SecureBootEnabled);
+            SecurityFirewallValue.Text = FormatState(_lastPcInformation?.FirewallEnabled);
+            SecurityRestartValue.Text = FormatYesNo(_lastPcInformation?.RestartPending);
+            SecurityStatusLabel.Text = string.Format(LocalizationService.Text("SecurityLoadedFormat"), _connectedTarget);
+            await SafeLogAsync("Inventory", _connectedTarget, "Security inventory", "Success");
+        }
+        catch (Exception exception)
+        {
+            SecurityStatusLabel.Text = string.Format(LocalizationService.Text("SecurityErrorFormat"), exception.Message);
+            await SafeLogAsync("Inventory", _connectedTarget, "Security inventory", "Error", exception.Message);
+        }
+        finally
+        {
+            RefreshSecurityButton.IsEnabled = true;
+        }
+    }
 
     private async void RefreshDrivers_Click(object sender, RoutedEventArgs e)
     {
@@ -152,6 +286,7 @@ public partial class MainWindow : Window
             var drivers = await DriverInventoryService.GetAsync(_connectedTarget);
             foreach (var driver in drivers) Drivers.Add(driver);
             DriversStatusLabel.Text = string.Format(LocalizationService.Text("DriversFoundFormat"), Drivers.Count, _connectedTarget);
+            await SafeLogAsync("Inventory", _connectedTarget, "Driver inventory", "Success", $"Drivers={Drivers.Count}");
         }
         catch (Exception exception)
         {
@@ -193,6 +328,8 @@ public partial class MainWindow : Window
             UpdatesStatusLabel.Text = result.Error is not null
                 ? string.Format(LocalizationService.Text("WingetErrorFormat"), result.Error)
                 : string.Format(LocalizationService.Text("UpdatesFoundFormat"), Updates.Count);
+            await SafeLogAsync("Inventory", _connectedTarget, "WinGet update check", result.Error is null ? "Success" : "Error",
+                result.Error ?? $"Updates={Updates.Count}");
         }
         finally
         {
@@ -209,6 +346,9 @@ public partial class MainWindow : Window
         SettingsPanel.Visibility = page == CentralPage.Settings ? Visibility.Visible : Visibility.Collapsed;
         UpdatesPanel.Visibility = page == CentralPage.Updates ? Visibility.Visible : Visibility.Collapsed;
         DriversPanel.Visibility = page == CentralPage.Drivers ? Visibility.Visible : Visibility.Collapsed;
+        ApplicationsPanel.Visibility = page == CentralPage.Applications ? Visibility.Visible : Visibility.Collapsed;
+        SecurityPanel.Visibility = page == CentralPage.Security ? Visibility.Visible : Visibility.Collapsed;
+        ActionLogPanel.Visibility = page == CentralPage.ActionLog ? Visibility.Visible : Visibility.Collapsed;
         var deviceVisibility = page == CentralPage.Workstation && !string.IsNullOrWhiteSpace(_connectedTarget)
             ? Visibility.Visible
             : Visibility.Collapsed;
@@ -231,6 +371,7 @@ public partial class MainWindow : Window
         try
         {
             var information = await PcInfoService.GetAsync(target);
+            _lastPcInformation = information;
             var uptime = DateTime.Now - information.LastBoot;
             var firewallText = information.FirewallEnabled switch
             {
@@ -267,10 +408,11 @@ public partial class MainWindow : Window
             _connectedTarget = target;
             if (CommandsPanel.Visibility == Visibility.Visible)
                 CommandTargetLabel.Text = target;
-            else if (FleetPanel.Visibility != Visibility.Visible && SettingsPanel.Visibility != Visibility.Visible && UpdatesPanel.Visibility != Visibility.Visible && DriversPanel.Visibility != Visibility.Visible)
+            else if (FleetPanel.Visibility != Visibility.Visible && SettingsPanel.Visibility != Visibility.Visible && UpdatesPanel.Visibility != Visibility.Visible && DriversPanel.Visibility != Visibility.Visible && ApplicationsPanel.Visibility != Visibility.Visible && SecurityPanel.Visibility != Visibility.Visible && ActionLogPanel.Visibility != Visibility.Visible)
                 ShowCentralPanel(CentralPage.Workstation);
 
             await LoadSoftwareInventoryAsync(target);
+            await SafeLogAsync("Connection", target, "Connect", "Success", information.Hostname);
         }
         catch (Exception exception)
         {
@@ -280,6 +422,7 @@ public partial class MainWindow : Window
                 LocalizationService.Text("ConnectionFailedTitle"),
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);
+            await SafeLogAsync("Connection", target, "Connect", "Error", exception.Message);
         }
         finally
         {
@@ -312,10 +455,22 @@ public partial class MainWindow : Window
                     "#FF57D7A3",
                     package.CanRepair,
                     false,
-                    package.CanUninstall));
+                    package.CanUninstall,
+                    package.ProductCode));
             }
 
-            InventoryCountLabel.Text = string.Format(LocalizationService.Text("InventoryCountFormat"), packages.Count);
+            if (IsLocalTarget(target))
+            {
+                var existingNames = _applications.Select(item => item.Name).ToHashSet(StringComparer.OrdinalIgnoreCase);
+                foreach (var package in await MsixInventoryService.GetAsync())
+                {
+                    if (!existingNames.Add(package.Name)) continue;
+                    _applications.Add(new ApplicationItem(package.Name, package.Publisher, package.Version, "MsixInstalled",
+                        "#244E9BFF", "#FF83B9FF", false, false, false, string.Empty));
+                }
+            }
+
+            InventoryCountLabel.Text = string.Format(LocalizationService.Text("InventoryCountFormat"), _applications.Count);
         }
         catch
         {
@@ -345,6 +500,27 @@ public partial class MainWindow : Window
         || target.Equals(Environment.MachineName, StringComparison.OrdinalIgnoreCase)
         || target is "127.0.0.1" or "::1" or ".";
 
+    private static string FormatState(bool? value) => value switch
+    {
+        true => LocalizationService.Text("Enabled"),
+        false => LocalizationService.Text("Disabled"),
+        null => LocalizationService.Text("Unknown")
+    };
+
+    private static string FormatYesNo(bool? value) => value switch
+    {
+        true => LocalizationService.Text("Yes"),
+        false => LocalizationService.Text("No"),
+        null => LocalizationService.Text("Unknown")
+    };
+
+    private static async Task SafeLogAsync(string category, string target, string action, string result, string details = "")
+    {
+        try { await ActionLogService.AppendAsync(category, target, action, result, details); }
+        catch (IOException) { }
+        catch (UnauthorizedAccessException) { }
+    }
+
     private void EnableSystemBackdrop()
     {
         if (!OperatingSystem.IsWindowsVersionAtLeast(10, 0, 22000)) return;
@@ -369,11 +545,15 @@ internal enum CentralPage
     Fleet,
     Settings,
     Updates,
-    Drivers
+    Drivers,
+    Applications,
+    Security,
+    ActionLog
 }
 
 public sealed record ApplicationItem(string Name, string Publisher, string Version, string StatusResourceKey,
-    string StatusBackgroundHex, string StatusForegroundHex, bool CanRepair, bool CanUpdate, bool CanUninstall)
+    string StatusBackgroundHex, string StatusForegroundHex, bool CanRepair, bool CanUpdate, bool CanUninstall,
+    string ProductCode)
 {
     public string Status => LocalizationService.Text(StatusResourceKey);
     public Brush StatusBackground => new SolidColorBrush((Color)ColorConverter.ConvertFromString(StatusBackgroundHex));

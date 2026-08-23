@@ -70,8 +70,9 @@ public static class SoftwareInventoryService
                         ReadString(appKey, "InstallDate").Trim(),
                         view == RegistryView.Registry64 ? "64-bit" : "32-bit",
                         hive == RegistryHive.CurrentUser ? "Current user" : "All users",
-                        !string.IsNullOrWhiteSpace(modifyPath) || isMsi,
-                        !string.IsNullOrWhiteSpace(quietUninstall) || !string.IsNullOrWhiteSpace(uninstall),
+                        isMsi,
+                        isMsi,
+                        isMsi ? subKeyName : string.Empty,
                         modifyPath,
                         quietUninstall,
                         uninstall));
@@ -123,6 +124,7 @@ public sealed record SoftwarePackage(
     string Scope,
     bool CanRepair,
     bool CanUninstall,
+    string ProductCode,
     string ModifyCommand,
     string QuietUninstallCommand,
     string UninstallCommand);

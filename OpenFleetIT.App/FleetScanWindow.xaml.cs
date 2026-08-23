@@ -61,6 +61,8 @@ public partial class FleetScanWindow : UserControl
         await Task.WhenAll(tasks);
         foreach (var result in liveResults.OrderBy(item => ParseIpv4(item.Address))) _results.Add(result);
         ScanStatus.Text = string.Format(LocalizationService.Text("ScanComplete"), _results.Count, addresses.Count);
+        await ActionLogService.AppendAsync("Discovery", $"{StartIpInput.Text.Trim()}-{EndIpInput.Text.Trim()}",
+            "IPv4 scan", "Success", $"{_results.Count}/{addresses.Count} active");
         ScanButton.IsEnabled = true;
     }
 
