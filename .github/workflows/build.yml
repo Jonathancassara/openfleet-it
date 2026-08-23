@@ -13,8 +13,8 @@ jobs:
   build-test-publish:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-dotnet@v5
         with:
           dotnet-version: 10.0.x
       - name: Restore
@@ -24,7 +24,7 @@ jobs:
       - name: Run alpha tests
         run: dotnet run --project OpenFleetIT.Tests -c Release --no-build
       - name: Publish self-contained alpha
-        run: dotnet publish OpenFleetIT.App/OpenFleetIT.App.csproj -p:PublishProfile=win-x64 --no-restore
+        run: dotnet publish OpenFleetIT.App/OpenFleetIT.App.csproj -p:PublishProfile=win-x64
       - name: Add release manifest
         shell: pwsh
         run: |
