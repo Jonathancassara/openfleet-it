@@ -33,7 +33,7 @@ jobs:
           "$hash  OpenFleetIT.App.exe" | Set-Content "$releasePath/checksums.txt" -Encoding ascii
           Copy-Item ALPHA-RELEASE-NOTES.md,LICENSE.md,SECURITY.md "$releasePath/"
           Copy-Item release/sbom.spdx.json "$releasePath/"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: OpenFleetIT-v0.1.0-alpha.1-win-x64
           path: artifacts/OpenFleetIT-v0.1.0-alpha.1-win-x64/
