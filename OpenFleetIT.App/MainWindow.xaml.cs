@@ -1,7 +1,10 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
 using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
@@ -28,6 +31,8 @@ public partial class MainWindow : Window
         InitializeComponent();
         ApplicationsView = CollectionViewSource.GetDefaultView(_applications);
         DataContext = this;
+        PopulateCurrentUser();
+        SettingsPanel.LanguageChanged += (_, _) => PopulateCurrentUser();
         SourceInitialized += (_, _) => EnableSystemBackdrop();
     }
 
@@ -355,6 +360,9 @@ public partial class MainWindow : Window
         DeviceHeaderPanel.Visibility = deviceVisibility;
         DeviceSummaryPanel.Visibility = deviceVisibility;
         DeviceDetailsPanel.Visibility = deviceVisibility;
+        WelcomePanel.Visibility = page == CentralPage.Workstation && string.IsNullOrWhiteSpace(_connectedTarget)
+            ? Visibility.Visible
+            : Visibility.Collapsed;
     }
 
     private async void Connect_Click(object sender, RoutedEventArgs e)
@@ -427,6 +435,57 @@ public partial class MainWindow : Window
         finally
         {
             ConnectButton.IsEnabled = true;
+        }
+    }
+
+    private void PopulateCurrentUser()
+    {
+        using var identity = WindowsIdentity.GetCurrent();
+        var account = identity.Name;
+        var displayName = account.Contains('\\') ? account[(account.LastIndexOf('\\') + 1)..] : account;
+        var isAdministrator = new WindowsPrincipal(identity).IsInRole(WindowsBuiltInRole.Administrator);
+        CurrentUserLabel.Text = displayName;
+        CurrentUserLabel.ToolTip = account;
+        UserInitialsLabel.Text = GetInitials(displayName);
+        PrivilegeStatusLabel.Text = LocalizationService.Text(isAdministrator ? "ElevatedAdministrator" : "StandardUser");
+        PrivilegeStatusLabel.Foreground = isAdministrator ? (Brush)FindResource("Success") : (Brush)FindResource("TextSecondary");
+        ElevateButton.Visibility = isAdministrator ? Visibility.Collapsed : Visibility.Visible;
+
+        var assembly = Assembly.GetExecutingAssembly();
+        var version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                      ?? assembly.GetName().Version?.ToString() ?? "—";
+        var build = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "—";
+        AppVersionLabel.Text = string.Format(LocalizationService.Text("ProgramVersionBuildFormat"), version, build);
+    }
+
+    private static string GetInitials(string value)
+    {
+        var parts = value.Split(['.', '-', '_', ' '], StringSplitOptions.RemoveEmptyEntries);
+        return parts.Length > 1
+            ? string.Concat(parts.Take(2).Select(part => char.ToUpperInvariant(part[0])))
+            : value[..Math.Min(2, value.Length)].ToUpperInvariant();
+    }
+
+    private void ElevateAccount_Click(object sender, RoutedEventArgs e)
+    {
+        var executable = Environment.ProcessPath;
+        if (string.IsNullOrWhiteSpace(executable)) return;
+        if (MessageBox.Show(LocalizationService.Text("ElevateConfirmation"), LocalizationService.Text("ElevateAccount"),
+                MessageBoxButton.YesNo, MessageBoxImage.Information) != MessageBoxResult.Yes) return;
+
+        try
+        {
+            Process.Start(new ProcessStartInfo(executable) { UseShellExecute = true, Verb = "runas" });
+            Close();
+        }
+        catch (Win32Exception exception) when (exception.NativeErrorCode == 1223)
+        {
+            // UAC was cancelled; the current non-elevated session remains open.
+        }
+        catch (Exception exception)
+        {
+            MessageBox.Show(string.Format(LocalizationService.Text("ElevationFailedFormat"), exception.Message),
+                LocalizationService.Text("ElevationFailedTitle"), MessageBoxButton.OK, MessageBoxImage.Error);
         }
     }
 

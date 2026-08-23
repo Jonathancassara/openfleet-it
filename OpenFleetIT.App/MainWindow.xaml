@@ -28,7 +28,7 @@
                             <Border.Background><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#A99CFF"/><GradientStop Color="#637BFF" Offset="1"/></LinearGradientBrush></Border.Background>
                             <TextBlock Text="&#xE950;" FontFamily="{StaticResource IconFont}" FontSize="19" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                         </Border>
-                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center"><TextBlock Text="OpenFleet" FontWeight="SemiBold" FontSize="17"/><TextBlock Text="IT workspace" Foreground="{StaticResource TextSecondary}" FontSize="10"/></StackPanel>
+                        <StackPanel Margin="11,0,0,0" VerticalAlignment="Center"><TextBlock Text="OpenFleet" FontWeight="SemiBold" FontSize="17"/><TextBlock Text="IT workspace" Foreground="{StaticResource TextSecondary}" FontSize="10"/><TextBlock x:Name="AppVersionLabel" Text="—" Foreground="#727D96" FontSize="8" Margin="0,2,0,0"/></StackPanel>
                     </StackPanel>
                     <StackPanel Grid.Row="1">
                         <TextBlock Text="{DynamicResource Workspace}" FontSize="10" FontWeight="SemiBold" Foreground="#77819A" Margin="14,0,0,9"/>
@@ -46,9 +46,9 @@
                     <Border Grid.Row="3" Background="#12FFFFFF" BorderBrush="#1FFFFFFF" BorderThickness="1" CornerRadius="18" Padding="12" Margin="0,12,0,0">
                         <Grid>
                             <Grid.ColumnDefinitions><ColumnDefinition Width="38"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-                            <Border Width="34" Height="34" CornerRadius="17" Background="#5D55A6"><TextBlock Text="JC" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
-                            <StackPanel Grid.Column="1" Margin="9,0" VerticalAlignment="Center"><TextBlock Text="Jonathan" FontWeight="SemiBold" FontSize="12"/><TextBlock Text="{DynamicResource Administrator}" Foreground="{StaticResource TextSecondary}" FontSize="9"/></StackPanel>
-                            <TextBlock Grid.Column="2" Text="&#xE70D;" FontFamily="{StaticResource IconFont}" Foreground="#7E89A3" VerticalAlignment="Center"/>
+                            <Border Width="34" Height="34" CornerRadius="17" Background="#5D55A6"><TextBlock x:Name="UserInitialsLabel" Text="—" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Center" VerticalAlignment="Center"/></Border>
+                            <StackPanel Grid.Column="1" Margin="9,0" VerticalAlignment="Center"><TextBlock x:Name="CurrentUserLabel" Text="—" FontWeight="SemiBold" FontSize="12" TextTrimming="CharacterEllipsis"/><TextBlock x:Name="PrivilegeStatusLabel" Text="—" Foreground="{StaticResource TextSecondary}" FontSize="9"/></StackPanel>
+                            <Button x:Name="ElevateButton" Grid.Column="2" Width="30" Height="30" Content="&#xE72E;" FontFamily="{StaticResource IconFont}" Foreground="#A99CFF" Background="#188B7CFF" BorderBrush="#308B7CFF" ToolTip="{DynamicResource ElevateAccount}" Cursor="Hand" Click="ElevateAccount_Click"/>
                         </Grid>
                     </Border>
                 </Grid>
@@ -125,6 +125,28 @@
                                 </DataGrid>
                             </Grid>
                         </Border>
+                    </Grid>
+                    <Grid x:Name="WelcomePanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Visible" IsHitTestVisible="False">
+                        <Grid.Resources>
+                            <Storyboard x:Key="AtomAnimation" RepeatBehavior="Forever">
+                                <DoubleAnimation Storyboard.TargetName="ElectronOrbit" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="0:0:3.8"/>
+                                <DoubleAnimation Storyboard.TargetName="ElectronOrbitTwo" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" From="120" To="480" Duration="0:0:5.2"/>
+                                <DoubleAnimation Storyboard.TargetName="NucleusGlow" Storyboard.TargetProperty="Opacity" From="0.48" To="0.9" Duration="0:0:1.4" AutoReverse="True" RepeatBehavior="Forever"/>
+                            </Storyboard>
+                        </Grid.Resources>
+                        <Grid.Triggers><EventTrigger RoutedEvent="FrameworkElement.Loaded"><BeginStoryboard Storyboard="{StaticResource AtomAnimation}"/></EventTrigger></Grid.Triggers>
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-35,0,0">
+                            <Grid Width="220" Height="220" HorizontalAlignment="Center">
+                                <Ellipse x:Name="NucleusGlow" Width="76" Height="76" Opacity="0.65"><Ellipse.Fill><RadialGradientBrush><GradientStop Color="#E4DFFF" Offset="0"/><GradientStop Color="#8B7CFF" Offset="0.35"/><GradientStop Color="#008B7CFF" Offset="1"/></RadialGradientBrush></Ellipse.Fill></Ellipse>
+                                <Ellipse Width="38" Height="38"><Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#BDB4FF"/><GradientStop Color="#637BFF" Offset="1"/></LinearGradientBrush></Ellipse.Fill><Ellipse.Effect><DropShadowEffect Color="#8B7CFF" BlurRadius="28" ShadowDepth="0" Opacity="0.9"/></Ellipse.Effect></Ellipse>
+                                <Ellipse Width="190" Height="76" Stroke="#547D83FF" StrokeThickness="1.4" RenderTransformOrigin="0.5,0.5" RenderTransform="{StaticResource Rotate30}"/>
+                                <Ellipse Width="190" Height="76" Stroke="#4057D7A3" StrokeThickness="1.4" RenderTransformOrigin="0.5,0.5" RenderTransform="{StaticResource RotateMinus30}"/>
+                                <Grid x:Name="ElectronOrbit" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform/></Grid.RenderTransform><Ellipse Width="12" Height="12" Fill="#B9B0FF" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,9,0"><Ellipse.Effect><DropShadowEffect Color="#9C90FF" BlurRadius="16" ShadowDepth="0" Opacity="1"/></Ellipse.Effect></Ellipse></Grid>
+                                <Grid x:Name="ElectronOrbitTwo" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="120"/></Grid.RenderTransform><Ellipse Width="9" Height="9" Fill="#57D7A3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,22,0"><Ellipse.Effect><DropShadowEffect Color="#57D7A3" BlurRadius="13" ShadowDepth="0"/></Ellipse.Effect></Ellipse></Grid>
+                            </Grid>
+                            <TextBlock Text="{DynamicResource WelcomeTitle}" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                            <TextBlock Text="{DynamicResource WelcomeSubtitle}" Foreground="{StaticResource TextSecondary}" FontSize="12" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                        </StackPanel>
                     </Grid>
                     <Grid x:Name="CommandsPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0">
                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="180"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>

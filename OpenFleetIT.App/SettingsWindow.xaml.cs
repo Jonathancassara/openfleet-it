@@ -7,6 +7,7 @@ namespace OpenFleetIT.App;
 
 public partial class SettingsWindow : UserControl
 {
+    public event EventHandler? LanguageChanged;
     private static readonly Regex SuffixPattern = new(@"^\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,63}$", RegexOptions.Compiled);
     private readonly ObservableCollection<string> _suffixes = [];
     private string _selectedLanguage = LocalizationService.English;
@@ -73,6 +74,7 @@ public partial class SettingsWindow : UserControl
         _selectedLanguage = item.Tag?.ToString() == LocalizationService.French ? LocalizationService.French : LocalizationService.English;
         LocalizationService.Apply(_selectedLanguage);
         UpdateStatus.Text = LocalizationService.Text("CurrentVersion");
+        LanguageChanged?.Invoke(this, EventArgs.Empty);
     }
 
 }
