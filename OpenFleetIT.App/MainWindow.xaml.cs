@@ -452,8 +452,8 @@ public partial class MainWindow : Window
         ElevateButton.Visibility = isAdministrator ? Visibility.Collapsed : Visibility.Visible;
 
         var assembly = Assembly.GetExecutingAssembly();
-        var version = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
-                      ?? assembly.GetName().Version?.ToString() ?? "—";
+        var version = (assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion
+                       ?? assembly.GetName().Version?.ToString() ?? "—").Split('+')[0];
         var build = assembly.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "—";
         AppVersionLabel.Text = string.Format(LocalizationService.Text("ProgramVersionBuildFormat"), version, build);
     }

@@ -129,8 +129,12 @@
                     <Grid x:Name="WelcomePanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Visible" IsHitTestVisible="False">
                         <Grid.Resources>
                             <Storyboard x:Key="AtomAnimation" RepeatBehavior="Forever">
-                                <DoubleAnimation Storyboard.TargetName="ElectronOrbit" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" From="0" To="360" Duration="0:0:3.8"/>
-                                <DoubleAnimation Storyboard.TargetName="ElectronOrbitTwo" Storyboard.TargetProperty="(UIElement.RenderTransform).(RotateTransform.Angle)" From="120" To="480" Duration="0:0:5.2"/>
+                                <MatrixAnimationUsingPath Storyboard.TargetName="ElectronOne" Storyboard.TargetProperty="(UIElement.RenderTransform).(MatrixTransform.Matrix)" Duration="0:0:4.2" RepeatBehavior="Forever" DoesRotateWithTangent="False">
+                                    <MatrixAnimationUsingPath.PathGeometry><PathGeometry Figures="M 205,110 A 95,38 0 1 1 15,110 A 95,38 0 1 1 205,110"/></MatrixAnimationUsingPath.PathGeometry>
+                                </MatrixAnimationUsingPath>
+                                <MatrixAnimationUsingPath Storyboard.TargetName="ElectronTwo" Storyboard.TargetProperty="(UIElement.RenderTransform).(MatrixTransform.Matrix)" Duration="0:0:5.6" RepeatBehavior="Forever" DoesRotateWithTangent="False" BeginTime="0:0:1.4">
+                                    <MatrixAnimationUsingPath.PathGeometry><PathGeometry Figures="M 15,110 A 95,38 0 1 0 205,110 A 95,38 0 1 0 15,110"/></MatrixAnimationUsingPath.PathGeometry>
+                                </MatrixAnimationUsingPath>
                                 <DoubleAnimation Storyboard.TargetName="NucleusGlow" Storyboard.TargetProperty="Opacity" From="0.48" To="0.9" Duration="0:0:1.4" AutoReverse="True" RepeatBehavior="Forever"/>
                             </Storyboard>
                         </Grid.Resources>
@@ -139,10 +143,14 @@
                             <Grid Width="220" Height="220" HorizontalAlignment="Center">
                                 <Ellipse x:Name="NucleusGlow" Width="76" Height="76" Opacity="0.65"><Ellipse.Fill><RadialGradientBrush><GradientStop Color="#E4DFFF" Offset="0"/><GradientStop Color="#8B7CFF" Offset="0.35"/><GradientStop Color="#008B7CFF" Offset="1"/></RadialGradientBrush></Ellipse.Fill></Ellipse>
                                 <Ellipse Width="38" Height="38"><Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#BDB4FF"/><GradientStop Color="#637BFF" Offset="1"/></LinearGradientBrush></Ellipse.Fill><Ellipse.Effect><DropShadowEffect Color="#8B7CFF" BlurRadius="28" ShadowDepth="0" Opacity="0.9"/></Ellipse.Effect></Ellipse>
-                                <Ellipse Width="190" Height="76" Stroke="#547D83FF" StrokeThickness="1.4" RenderTransformOrigin="0.5,0.5" RenderTransform="{StaticResource Rotate30}"/>
-                                <Ellipse Width="190" Height="76" Stroke="#4057D7A3" StrokeThickness="1.4" RenderTransformOrigin="0.5,0.5" RenderTransform="{StaticResource RotateMinus30}"/>
-                                <Grid x:Name="ElectronOrbit" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform/></Grid.RenderTransform><Ellipse Width="12" Height="12" Fill="#B9B0FF" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,9,0"><Ellipse.Effect><DropShadowEffect Color="#9C90FF" BlurRadius="16" ShadowDepth="0" Opacity="1"/></Ellipse.Effect></Ellipse></Grid>
-                                <Grid x:Name="ElectronOrbitTwo" RenderTransformOrigin="0.5,0.5"><Grid.RenderTransform><RotateTransform Angle="120"/></Grid.RenderTransform><Ellipse Width="9" Height="9" Fill="#57D7A3" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,22,0"><Ellipse.Effect><DropShadowEffect Color="#57D7A3" BlurRadius="13" ShadowDepth="0"/></Ellipse.Effect></Ellipse></Grid>
+                                <Canvas Width="220" Height="220" RenderTransformOrigin="0.5,0.5"><Canvas.RenderTransform><RotateTransform Angle="30"/></Canvas.RenderTransform>
+                                    <Path Data="M 205,110 A 95,38 0 1 1 15,110 A 95,38 0 1 1 205,110" Stroke="#547D83FF" StrokeThickness="1.4"/>
+                                    <Ellipse x:Name="ElectronOne" Width="12" Height="12" Canvas.Left="-6" Canvas.Top="-6" Fill="#B9B0FF"><Ellipse.RenderTransform><MatrixTransform/></Ellipse.RenderTransform><Ellipse.Effect><DropShadowEffect Color="#9C90FF" BlurRadius="16" ShadowDepth="0" Opacity="1"/></Ellipse.Effect></Ellipse>
+                                </Canvas>
+                                <Canvas Width="220" Height="220" RenderTransformOrigin="0.5,0.5"><Canvas.RenderTransform><RotateTransform Angle="-30"/></Canvas.RenderTransform>
+                                    <Path Data="M 15,110 A 95,38 0 1 0 205,110 A 95,38 0 1 0 15,110" Stroke="#4057D7A3" StrokeThickness="1.4"/>
+                                    <Ellipse x:Name="ElectronTwo" Width="9" Height="9" Canvas.Left="-4.5" Canvas.Top="-4.5" Fill="#57D7A3"><Ellipse.RenderTransform><MatrixTransform/></Ellipse.RenderTransform><Ellipse.Effect><DropShadowEffect Color="#57D7A3" BlurRadius="13" ShadowDepth="0"/></Ellipse.Effect></Ellipse>
+                                </Canvas>
                             </Grid>
                             <TextBlock Text="{DynamicResource WelcomeTitle}" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,8,0,0"/>
                             <TextBlock Text="{DynamicResource WelcomeSubtitle}" Foreground="{StaticResource TextSecondary}" FontSize="12" HorizontalAlignment="Center" Margin="0,8,0,0"/>

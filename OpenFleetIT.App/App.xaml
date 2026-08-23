@@ -5,7 +5,6 @@
             <FontFamily x:Key="UiFont">Segoe UI Variable Display, Segoe UI</FontFamily><FontFamily x:Key="IconFont">Segoe Fluent Icons</FontFamily>
             <SolidColorBrush x:Key="TextPrimary" Color="#F6F8FF"/><SolidColorBrush x:Key="TextSecondary" Color="#AAB3C8"/><SolidColorBrush x:Key="GlassStroke" Color="#2AFFFFFF"/><SolidColorBrush x:Key="GlassFill" Color="#B0141926"/><SolidColorBrush x:Key="Accent" Color="#8B7CFF"/><SolidColorBrush x:Key="AccentSoft" Color="#338B7CFF"/><SolidColorBrush x:Key="Success" Color="#57D7A3"/><SolidColorBrush x:Key="Warning" Color="#FFBC66"/><SolidColorBrush x:Key="Danger" Color="#FF7188"/>
             <LinearGradientBrush x:Key="NavIconActive" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#A79BFF" Offset="0"/><GradientStop Color="#6656E8" Offset="1"/></LinearGradientBrush>
-            <RotateTransform x:Key="Rotate30" Angle="30"/><RotateTransform x:Key="RotateMinus30" Angle="-30"/>
             <DropShadowEffect x:Key="SoftShadow" BlurRadius="34" ShadowDepth="10" Opacity="0.30" Color="#02040A"/>
             <Style x:Key="GlassCard" TargetType="Border"><Setter Property="Background" Value="{StaticResource GlassFill}"/><Setter Property="BorderBrush" Value="{StaticResource GlassStroke}"/><Setter Property="BorderThickness" Value="1"/><Setter Property="CornerRadius" Value="24"/><Setter Property="Effect" Value="{StaticResource SoftShadow}"/></Style>
             <Style x:Key="NavButton" TargetType="RadioButton">
