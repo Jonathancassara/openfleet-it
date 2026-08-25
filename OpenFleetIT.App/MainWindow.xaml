@@ -145,11 +145,11 @@
                                 <Ellipse Width="38" Height="38"><Ellipse.Fill><LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#BDB4FF"/><GradientStop Color="#637BFF" Offset="1"/></LinearGradientBrush></Ellipse.Fill><Ellipse.Effect><DropShadowEffect Color="#8B7CFF" BlurRadius="28" ShadowDepth="0" Opacity="0.9"/></Ellipse.Effect></Ellipse>
                                 <Canvas Width="220" Height="220" RenderTransformOrigin="0.5,0.5"><Canvas.RenderTransform><RotateTransform Angle="30"/></Canvas.RenderTransform>
                                     <Path Data="M 205,110 A 95,38 0 1 1 15,110 A 95,38 0 1 1 205,110" Stroke="#547D83FF" StrokeThickness="1.4"/>
-                                    <Ellipse x:Name="ElectronOne" Width="12" Height="12" Canvas.Left="-6" Canvas.Top="-6" Fill="#B9B0FF"><Ellipse.RenderTransform><MatrixTransform/></Ellipse.RenderTransform><Ellipse.Effect><DropShadowEffect Color="#9C90FF" BlurRadius="16" ShadowDepth="0" Opacity="1"/></Ellipse.Effect></Ellipse>
+                                    <Ellipse x:Name="ElectronOne" Width="12" Height="12" Canvas.Left="-6" Canvas.Top="-6" Fill="#B9B0FF"><Ellipse.RenderTransform><MatrixTransform Matrix="1,0,0,1,205,110"/></Ellipse.RenderTransform><Ellipse.Effect><DropShadowEffect Color="#9C90FF" BlurRadius="16" ShadowDepth="0" Opacity="1"/></Ellipse.Effect></Ellipse>
                                 </Canvas>
                                 <Canvas Width="220" Height="220" RenderTransformOrigin="0.5,0.5"><Canvas.RenderTransform><RotateTransform Angle="-30"/></Canvas.RenderTransform>
                                     <Path Data="M 15,110 A 95,38 0 1 0 205,110 A 95,38 0 1 0 15,110" Stroke="#4057D7A3" StrokeThickness="1.4"/>
-                                    <Ellipse x:Name="ElectronTwo" Width="9" Height="9" Canvas.Left="-4.5" Canvas.Top="-4.5" Fill="#57D7A3"><Ellipse.RenderTransform><MatrixTransform/></Ellipse.RenderTransform><Ellipse.Effect><DropShadowEffect Color="#57D7A3" BlurRadius="13" ShadowDepth="0"/></Ellipse.Effect></Ellipse>
+                                    <Ellipse x:Name="ElectronTwo" Width="9" Height="9" Canvas.Left="-4.5" Canvas.Top="-4.5" Fill="#57D7A3"><Ellipse.RenderTransform><MatrixTransform Matrix="1,0,0,1,15,110"/></Ellipse.RenderTransform><Ellipse.Effect><DropShadowEffect Color="#57D7A3" BlurRadius="13" ShadowDepth="0"/></Ellipse.Effect></Ellipse>
                                 </Canvas>
                             </Grid>
                             <TextBlock Text="{DynamicResource WelcomeTitle}" FontSize="24" FontWeight="SemiBold" HorizontalAlignment="Center" Margin="0,8,0,0"/>
