@@ -1,0 +1,47 @@
+name: Bug report
+description: Report a reproducible problem in OpenFleet IT
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting a problem. Do not include passwords, tokens, private IP addresses or confidential company data.
+  - type: input
+    id: version
+    attributes:
+      label: OpenFleet IT version
+      placeholder: v0.1.0-alpha.1
+    validations:
+      required: true
+  - type: dropdown
+    id: windows
+    attributes:
+      label: Windows version
+      options:
+        - Windows 11
+        - Windows 10
+        - Windows Server 2025
+        - Windows Server 2022
+        - Other Windows version
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Problem
+      description: What happened, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      placeholder: "1. Open…\n2. Connect to…\n3. Select…"
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or screenshots
+      description: Remove credentials, private addresses, hostnames and confidential information before posting.
+

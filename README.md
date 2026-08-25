@@ -59,3 +59,7 @@ Read [SECURITY.md](SECURITY.md) before enabling remote administration. OpenFleet
 ## License
 
 OpenFleet IT is source-available under the [PolyForm Strict License 1.0.0](LICENSE.md). Commercial use, redistribution, and derivative works are not permitted by that license.
+
+## Feedback and contributions
+
+OpenFleet IT currently accepts bug reports and feature requests through [GitHub Issues](https://github.com/Jonathancassara/openfleet-it/issues). External pull requests and modified distributions are not accepted. See [CONTRIBUTING.md](CONTRIBUTING.md) and [LICENSE.md](LICENSE.md).

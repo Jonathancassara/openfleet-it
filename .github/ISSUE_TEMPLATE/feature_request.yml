@@ -1,0 +1,23 @@
+name: Feature request
+description: Suggest an improvement for OpenFleet IT
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: IT problem to solve
+      description: Describe the operational need rather than only the proposed interface.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
