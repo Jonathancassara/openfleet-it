@@ -1,0 +1,85 @@
+# .NET build and publish output
+**/bin/
+**/obj/
+artifacts/
+publish/
+/Last Version/
+TestResults/
+coverage/
+coverage.*
+*.trx
+
+# Visual Studio, Rider and VS Code user state
+.vs/
+.idea/
+.vscode/settings.json
+.vscode/tasks.json
+.vscode/launch.json
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+_ReSharper*/
+*.DotSettings.user
+
+# NuGet and local tooling
+packages/
+*.nupkg
+*.snupkg
+.nuget/
+.dotnet/
+
+# Environment files and local configuration
+.env
+.env.*
+!.env.example
+appsettings.Local.json
+appsettings.*.Local.json
+appsettings.Development.local.json
+secrets.json
+secrets.*.json
+local.settings.json
+
+# Credentials, tokens, certificates and signing material
+*.pfx
+*.p12
+*.pem
+*.key
+*.private-key
+*.cer
+*.crt
+*.jks
+*.keystore
+credentials.json
+credentials.*.json
+tokens.json
+tokens.*.json
+
+# Databases, logs, dumps and temporary files
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+*.log
+logs/
+*.dmp
+*.tmp
+*.temp
+*.bak
+*.swp
+*~
+
+# Installer and release artifacts
+*.msi
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+*.zip
+*.7z
+
+# Operating-system metadata
+.DS_Store
+Thumbs.db
+Desktop.ini

@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="OpenFleetIT.App/OpenFleetIT.App.csproj" />
+  <Project Path="OpenFleetIT.Tests/OpenFleetIT.Tests.csproj" />
+</Solution>
