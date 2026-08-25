@@ -53,4 +53,16 @@
 - [x] Add self-contained Windows x64 publishing.
 - [x] Generate final release checksums and an SPDX software bill of materials.
 - [x] Prepare the `v0.1.0-alpha.1` release notes and artifact profile.
-- [ ] Merge the validated feature branch into `main`.
+- [x] Merge the validated feature branch into `main`.
+
+## Phase 5 — Linux administration console
+
+- [ ] Extract shared models, inventory contracts and validation into `OpenFleetIT.Core`.
+- [ ] Create a modern Linux desktop client with Avalonia UI and .NET 10.
+- [ ] Implement an agentless, read-only Windows transport over secured WinRM/HTTPS.
+- [ ] Evaluate PowerShell Remoting over SSH as an alternative transport when Windows OpenSSH is enabled.
+- [ ] Support Kerberos, certificate-based authentication and the Linux system credential vault without storing passwords in OpenFleet.
+- [ ] Retrieve Windows version/build, uptime, firewall, restart state, software, security and driver inventory from Linux.
+- [ ] Keep remote actions disabled in the first Linux alpha and document all Windows-side prerequisites.
+- [ ] Add transport integration tests against disposable Windows Server and Windows 11 virtual machines.
+- [ ] Design shared audit records and capability negotiation across the Windows and Linux clients.
