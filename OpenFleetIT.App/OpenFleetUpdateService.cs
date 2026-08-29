@@ -6,7 +6,7 @@ namespace OpenFleetIT.App;
 
 public static class OpenFleetUpdateService
 {
-    public const string CurrentVersion = "0.1.0-alpha.1";
+    public const string CurrentVersion = "0.1.1-alpha.1";
     private static readonly Uri ReleasesUri = new("https://api.github.com/repos/Jonathancassara/openfleet-it/releases?per_page=10");
 
     public static async Task<OpenFleetUpdateResult> CheckAsync(CancellationToken cancellationToken = default)

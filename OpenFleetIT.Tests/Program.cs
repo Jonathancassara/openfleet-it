@@ -31,12 +31,50 @@ VLC media player              VideoLAN.VLC              3.0.20     3.0.21      w
 });
 
 Test("WinGet empty output", () => Equal(0, WingetUpdateService.Parse("No upgrades available.").Count));
+Test("WinGet ignores malformed rows and ANSI sequences", () =>
+{
+    const string output = "\u001b[32mName Id Version Available Source\u001b[0m\r\n" +
+                          "-----------------------------------------------\r\n" +
+                          "Broken row\r\n" +
+                          "VLC media player              VideoLAN.VLC              3.0.20     3.0.21      winget\r\n";
+    var updates = WingetUpdateService.Parse(output);
+    Equal(1, updates.Count);
+    Equal("VideoLAN.VLC", updates[0].Id);
+});
 Test("MSI command preview", () => Equal(
     "msiexec.exe /x {11111111-1111-1111-1111-111111111111} /passive /norestart",
     SoftwareActionService.PreviewMsi("{11111111-1111-1111-1111-111111111111}", false)));
 Test("WinGet exact command preview", () => Equal(
     "winget.exe upgrade --id VideoLAN.VLC --exact --accept-source-agreements --accept-package-agreements --disable-interactivity",
     SoftwareActionService.PreviewWinget("VideoLAN.VLC")));
+Test("CSV export escapes commas and quotes", () => Equal(
+    "\"ACME, \"\"Suite\"\"\"",
+    InventoryExportService.Csv("ACME, \"Suite\"")));
+Test("Coordinator prevents duplicate package action", () =>
+{
+    var coordinator = new ActionExecutionCoordinator();
+    Equal(true, coordinator.TryBegin("winget:VideoLAN.VLC", CancellationToken.None, out var first));
+    Equal(false, coordinator.TryBegin("winget:videolan.vlc", CancellationToken.None, out var duplicate));
+    Equal(null, duplicate);
+    first!.Dispose();
+    Equal(true, coordinator.TryBegin("winget:VideoLAN.VLC", CancellationToken.None, out var next));
+    next!.Dispose();
+});
+Test("Coordinator cancels active actions", () =>
+{
+    var coordinator = new ActionExecutionCoordinator();
+    coordinator.TryBegin("power:localhost", CancellationToken.None, out var lease);
+    coordinator.CancelAll();
+    Equal(true, lease!.Token.IsCancellationRequested);
+    lease.Dispose();
+});
+Test("Pairing code format", () =>
+{
+    var code = OpenFleetIT.Core.PairingCode.Create();
+    Equal(true, OpenFleetIT.Core.PairingCode.IsValidFormat(code));
+    Equal(true, OpenFleetIT.Core.PairingCode.FixedTimeEquals(code, code));
+    Equal(false, OpenFleetIT.Core.PairingCode.FixedTimeEquals(code, "000000" == code ? "000001" : "000000"));
+});
 
 if (failures.Count > 0)
 {

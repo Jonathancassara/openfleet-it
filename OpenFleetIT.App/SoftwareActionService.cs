@@ -5,7 +5,7 @@ namespace OpenFleetIT.App;
 
 public static class SoftwareActionService
 {
-    private static readonly SemaphoreSlim ExecutionGate = new(1, 1);
+    private static readonly ActionExecutionCoordinator Coordinator = new();
 
     public static string PreviewMsi(string productCode, bool repair) => repair
         ? $"msiexec.exe /fa {productCode} /passive /norestart"
@@ -23,7 +23,7 @@ public static class SoftwareActionService
         var arguments = repair
             ? new[] { "/fa", productCode, "/passive", "/norestart" }
             : new[] { "/x", productCode, "/passive", "/norestart" };
-        return await ExecuteAsync("msiexec.exe", arguments, elevate: true, cancellationToken);
+        return await ExecuteExclusiveAsync($"msi:{productCode}", "msiexec.exe", arguments, elevate: true, cancellationToken);
     }
 
     public static async Task<ActionExecutionResult> ExecuteWingetAsync(string executablePath, string packageId,
@@ -31,7 +31,7 @@ public static class SoftwareActionService
     {
         if (string.IsNullOrWhiteSpace(packageId) || packageId.Any(char.IsWhiteSpace))
             return new ActionExecutionResult(false, -1, "Invalid WinGet package ID.");
-        return await ExecuteAsync(executablePath,
+        return await ExecuteExclusiveAsync($"winget:{packageId}", executablePath,
             ["upgrade", "--id", packageId, "--exact", "--accept-source-agreements", "--accept-package-agreements", "--disable-interactivity"],
             elevate: false, cancellationToken);
     }
@@ -54,14 +54,24 @@ public static class SoftwareActionService
             case PowerAction.Reboot: arguments.AddRange(["/r", "/t", "30", "/c", "OpenFleet IT alpha requested reboot"]); break;
             case PowerAction.Abort: arguments.Add("/a"); break;
         }
-        return await ExecuteAsync("shutdown.exe", arguments, elevate: !local, cancellationToken);
+        return await ExecuteExclusiveAsync($"power:{target}", "shutdown.exe", arguments, elevate: !local, cancellationToken);
+    }
+
+    public static void CancelAll() => Coordinator.CancelAll();
+
+    private static async Task<ActionExecutionResult> ExecuteExclusiveAsync(string key, string fileName,
+        IEnumerable<string> arguments, bool elevate, CancellationToken cancellationToken)
+    {
+        if (!Coordinator.TryBegin(key, cancellationToken, out var lease) || lease is null)
+            return new ActionExecutionResult(false, -1, "An action is already running for this target.");
+        using (lease)
+            return await ExecuteAsync(fileName, arguments, elevate, lease.Token);
     }
 
     private static async Task<ActionExecutionResult> ExecuteAsync(string fileName, IEnumerable<string> arguments,
         bool elevate, CancellationToken cancellationToken)
     {
-        if (!await ExecutionGate.WaitAsync(0, cancellationToken))
-            return new ActionExecutionResult(false, -1, "Another administrative action is already running.");
+        Process? process = null;
         try
         {
             var startInfo = new ProcessStartInfo
@@ -74,7 +84,7 @@ public static class SoftwareActionService
                 RedirectStandardError = !elevate
             };
             foreach (var argument in arguments) startInfo.ArgumentList.Add(argument);
-            using var process = new Process { StartInfo = startInfo };
+            process = new Process { StartInfo = startInfo };
             process.Start();
             var outputTask = elevate ? Task.FromResult(string.Empty) : process.StandardOutput.ReadToEndAsync(cancellationToken);
             var errorTask = elevate ? Task.FromResult(string.Empty) : process.StandardError.ReadToEndAsync(cancellationToken);
@@ -86,6 +96,11 @@ public static class SoftwareActionService
             {
                 process.Kill(entireProcessTree: true);
                 return new ActionExecutionResult(false, -1, "The action exceeded the 10-minute timeout.");
+            }
+            catch (OperationCanceledException)
+            {
+                if (!process.HasExited) process.Kill(entireProcessTree: true);
+                return new ActionExecutionResult(false, 1223, "The action was cancelled.");
             }
             var output = await outputTask;
             var error = await errorTask;
@@ -103,7 +118,7 @@ public static class SoftwareActionService
         }
         finally
         {
-            ExecutionGate.Release();
+            process?.Dispose();
         }
     }
 }

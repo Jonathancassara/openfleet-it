@@ -52,6 +52,12 @@ dotnet publish OpenFleetIT.App/OpenFleetIT.App.csproj -p:PublishProfile=win-x64
 
 The self-contained output is written to `artifacts/OpenFleetIT-v0.1.0-alpha.1-win-x64` and does not require a separate .NET installation.
 
+## Current development
+
+The `v0.1.1-alpha.1` stabilization work adds cancellable package actions, per-package concurrency protection and CSV/JSON software inventory export. The `v0.2.0-alpha.1` Home foundation adds shared protocol contracts and an optional read-only Windows Helper secured with HTTPS, one-time pairing and client certificates.
+
+See [Home Helper alpha documentation](docs/HOME-HELPER-ALPHA.md) for its current security boundary and remaining work. The Helper is not yet installed or enabled by the desktop application.
+
 ## Security
 
 Read [SECURITY.md](SECURITY.md) before enabling remote administration. OpenFleet IT never bundles PsExec and does not request or store remote passwords.
