@@ -10,6 +10,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
+using OpenFleetIT.Core;
 
 namespace OpenFleetIT.App;
 
@@ -34,6 +35,7 @@ public partial class MainWindow : Window
         DataContext = this;
         PopulateCurrentUser();
         SettingsPanel.LanguageChanged += (_, _) => PopulateCurrentUser();
+        HomeHelperPanel.InventoryConnected += HomeHelperPanel_InventoryConnected;
         SourceInitialized += (_, _) => EnableSystemBackdrop();
     }
 
@@ -63,6 +65,8 @@ public partial class MainWindow : Window
     private void OpenApplications_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Applications);
 
     private void OpenSecurity_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Security);
+
+    private void OpenHomeDevices_Click(object sender, RoutedEventArgs e) => ShowCentralPanel(CentralPage.Home);
 
     private async void OpenActionLog_Click(object sender, RoutedEventArgs e)
     {
@@ -432,6 +436,7 @@ public partial class MainWindow : Window
         ApplicationsPanel.Visibility = page == CentralPage.Applications ? Visibility.Visible : Visibility.Collapsed;
         SecurityPanel.Visibility = page == CentralPage.Security ? Visibility.Visible : Visibility.Collapsed;
         ActionLogPanel.Visibility = page == CentralPage.ActionLog ? Visibility.Visible : Visibility.Collapsed;
+        HomeHelperPanel.Visibility = page == CentralPage.Home ? Visibility.Visible : Visibility.Collapsed;
         var deviceVisibility = page == CentralPage.Workstation && !string.IsNullOrWhiteSpace(_connectedTarget)
             ? Visibility.Visible
             : Visibility.Collapsed;
@@ -441,6 +446,43 @@ public partial class MainWindow : Window
         WelcomePanel.Visibility = page == CentralPage.Workstation && string.IsNullOrWhiteSpace(_connectedTarget)
             ? Visibility.Visible
             : Visibility.Collapsed;
+    }
+
+    private void HomeHelperPanel_InventoryConnected(object? sender, HomeInventorySnapshot snapshot)
+    {
+        _connectedTarget = snapshot.DeviceName;
+        _lastPcInformation = null;
+        ConnectionTargetInput.Text = snapshot.DeviceName;
+        DeviceTitleLabel.Text = snapshot.DeviceName.ToUpperInvariant();
+        SelectedDeviceLabel.Text = $"  /  {snapshot.DeviceName}";
+        ConnectionStatusLabel.Text = $"OPENFLEET HELPER · {LocalizationService.Text("Connected")}";
+        WindowsVersionLabel.Text = snapshot.Windows.Caption.Replace("Microsoft ", string.Empty, StringComparison.OrdinalIgnoreCase);
+        WindowsBuildLabel.Text = string.Format(LocalizationService.Text("BuildFormat"), snapshot.Windows.Version, snapshot.Windows.Build);
+        var uptime = snapshot.Windows.LastBootUtc is { } boot ? DateTimeOffset.UtcNow - boot : TimeSpan.Zero;
+        UptimeLabel.Text = string.Format(LocalizationService.Text("UptimeFormat"), Math.Max(0, uptime.Days), Math.Max(0, uptime.Hours));
+        BootDateLabel.Text = snapshot.Windows.LastBootUtc is { } bootDate
+            ? string.Format(LocalizationService.Text("BootDateFormat"), bootDate.LocalDateTime)
+            : LocalizationService.Text("InformationUnavailable");
+        FirewallStatusLabel.Text = FormatState(snapshot.Windows.FirewallEnabled);
+        FirewallDetailsLabel.Text = LocalizationService.Text("HelperReadOnly");
+        RestartStatusLabel.Text = FormatYesNo(snapshot.Windows.RestartPending);
+        RestartReasonLabel.Text = snapshot.Windows.RestartPending == true
+            ? LocalizationService.Text("SystemRegistry") : LocalizationService.Text("NoRestartPending");
+
+        _applications.Clear();
+        foreach (var software in snapshot.Software)
+            _applications.Add(new ApplicationItem(software.Name, software.Publisher, software.Version, "Installed",
+                "#2457D7A3", "#FF57D7A3", false, false, false, string.Empty));
+        InventoryCountLabel.Text = string.Format(LocalizationService.Text("InventoryCountFormat"), _applications.Count);
+
+        Drivers.Clear();
+        foreach (var driver in snapshot.Drivers)
+            Drivers.Add(new InstalledDriver(driver.DeviceName, "—", driver.Manufacturer, driver.DriverVersion,
+                null, "—", false));
+        DriversStatusLabel.Text = string.Format(LocalizationService.Text("DriversFoundFormat"), Drivers.Count, snapshot.DeviceName);
+        ShowCentralPanel(CentralPage.Workstation);
+        _ = SafeLogAsync("Home", snapshot.DeviceName, "Helper inventory", "Success",
+            $"Software={snapshot.Software.Count}; Drivers={snapshot.Drivers.Count}");
     }
 
     private async void Connect_Click(object sender, RoutedEventArgs e)
@@ -685,7 +727,8 @@ internal enum CentralPage
     Drivers,
     Applications,
     Security,
-    ActionLog
+    ActionLog,
+    Home
 }
 
 public sealed record ApplicationItem(string Name, string Publisher, string Version, string StatusResourceKey,

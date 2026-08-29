@@ -7,7 +7,7 @@ OpenFleet Helper is an optional, read-only Windows companion for family and smal
 - HTTPS is mandatory on port `47831`.
 - The pairing code is generated locally, expires after five minutes, works once and is locked after five failed attempts.
 - Pairing issues a unique one-year client certificate. `/v1/inventory` rejects requests without a paired certificate.
-- The console operator must compare the SHA-256 server fingerprint shown locally by the Helper before accepting the certificate. The in-app confirmation/import workflow is still a TODO.
+- The console operator must enter and compare the SHA-256 server fingerprint shown locally by the Helper before accepting the certificate. The **Home devices** panel pins that fingerprint and imports the issued client certificate into the current user's Windows certificate store.
 - No administrator password is requested or stored.
 - The Helper creates no Windows Firewall rule. For testing, add a narrowly scoped inbound rule for TCP 47831 on the Private profile and local subnet only, then remove it after testing.
 - The device identifier and paired public thumbprints live under `%LOCALAPPDATA%\OpenFleetIT\Helper`. CA and server private keys are non-exportable and persist in the current user's Windows certificate store. Nothing is written to the repository.
@@ -34,4 +34,4 @@ The terminal prints the pairing code and server fingerprint. Do not post either 
 
 ## Before a Home release
 
-The desktop console still needs fingerprint confirmation, secure import into the Windows certificate store, local-network discovery, unpair/revocation, rate limiting across restarts, Private-profile firewall automation, DHCP reconnect tests and a signed Windows service installer.
+The desktop console still needs local-network discovery, unpair/revocation, rate limiting across restarts, Private-profile firewall automation, DHCP reconnect tests and a signed Windows service installer.
