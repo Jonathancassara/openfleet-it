@@ -25,16 +25,27 @@ jobs:
         run: dotnet run --project OpenFleetIT.Tests -c Release --no-build
       - name: Publish self-contained alpha
         run: dotnet publish OpenFleetIT.App/OpenFleetIT.App.csproj -p:PublishProfile=win-x64
+      - name: Publish read-only Helper alpha
+        run: dotnet publish OpenFleetIT.Helper/OpenFleetIT.Helper.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -o artifacts/OpenFleetIT-Helper-v0.2.0-alpha.1-win-x64
       - name: Add release manifest
         shell: pwsh
         run: |
-          $releasePath = "artifacts/OpenFleetIT-v0.1.0-alpha.1-win-x64"
+          $releasePath = "artifacts/OpenFleetIT-v0.1.1-alpha.1-win-x64"
           $hash = (Get-FileHash "$releasePath/OpenFleetIT.App.exe" -Algorithm SHA256).Hash
           "$hash  OpenFleetIT.App.exe" | Set-Content "$releasePath/checksums.txt" -Encoding ascii
-          Copy-Item ALPHA-RELEASE-NOTES.md,LICENSE.md,SECURITY.md "$releasePath/"
+          Copy-Item V0.1.1-RELEASE-NOTES.md,LICENSE.md,SECURITY.md "$releasePath/"
           Copy-Item release/sbom.spdx.json "$releasePath/"
+          $helperPath = "artifacts/OpenFleetIT-Helper-v0.2.0-alpha.1-win-x64"
+          $helperHash = (Get-FileHash "$helperPath/OpenFleetIT.Helper.exe" -Algorithm SHA256).Hash
+          "$helperHash  OpenFleetIT.Helper.exe" | Set-Content "$helperPath/checksums.txt" -Encoding ascii
+          Copy-Item docs/HOME-HELPER-ALPHA.md,LICENSE.md,SECURITY.md "$helperPath/"
       - uses: actions/upload-artifact@v7
         with:
-          name: OpenFleetIT-v0.1.0-alpha.1-win-x64
-          path: artifacts/OpenFleetIT-v0.1.0-alpha.1-win-x64/
+          name: OpenFleetIT-v0.1.1-alpha.1-win-x64
+          path: artifacts/OpenFleetIT-v0.1.1-alpha.1-win-x64/
+          if-no-files-found: error
+      - uses: actions/upload-artifact@v7
+        with:
+          name: OpenFleetIT-Helper-v0.2.0-alpha.1-win-x64
+          path: artifacts/OpenFleetIT-Helper-v0.2.0-alpha.1-win-x64/
           if-no-files-found: error

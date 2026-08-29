@@ -21,6 +21,7 @@ public partial class MainWindow : Window
     public ObservableCollection<ActionLogEntry> ActionEntries { get; } = [];
     private string? _connectedTarget;
     private PcInformation? _lastPcInformation;
+    private CancellationTokenSource? _activeActionCancellation;
 
     public ICollectionView ApplicationsView { get; }
 
@@ -100,14 +101,22 @@ public partial class MainWindow : Window
         if (MessageBox.Show(string.Format(LocalizationService.Text("SoftwareActionConfirmation"), LocalizationService.Text(actionKey), application.Name, preview),
                 LocalizationService.Text("ConfirmAction"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
 
+        if (!TryBeginAction(out var cancellationToken)) return;
         button.IsEnabled = false;
-        var result = await SoftwareActionService.ExecuteMsiAsync(application.ProductCode, repair);
-        await SafeLogAsync("Software", _connectedTarget, $"{actionKey} {application.Name}", result.Success ? "Success" : "Error",
-            $"ExitCode={result.ExitCode}; {result.Details}");
-        MessageBox.Show(string.Format(LocalizationService.Text("ActionResultFormat"), result.Success ? LocalizationService.Text("ActionSucceeded") : LocalizationService.Text("ActionFailed"), result.ExitCode, result.Details),
-            LocalizationService.Text("ActionResult"), MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
-        button.IsEnabled = true;
-        if (result.Success) await LoadSoftwareInventoryAsync(_connectedTarget);
+        try
+        {
+            var result = await SoftwareActionService.ExecuteMsiAsync(application.ProductCode, repair, cancellationToken);
+            await SafeLogAsync("Software", _connectedTarget, $"{actionKey} {application.Name}", result.Success ? "Success" : "Error",
+                $"ExitCode={result.ExitCode}; {result.Details}");
+            MessageBox.Show(string.Format(LocalizationService.Text("ActionResultFormat"), result.Success ? LocalizationService.Text("ActionSucceeded") : LocalizationService.Text("ActionFailed"), result.ExitCode, result.Details),
+                LocalizationService.Text("ActionResult"), MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
+            if (result.Success) await LoadSoftwareInventoryAsync(_connectedTarget);
+        }
+        finally
+        {
+            button.IsEnabled = true;
+            FinishAction();
+        }
     }
 
     private void OpenSettings_Click(object sender, RoutedEventArgs e)
@@ -147,14 +156,83 @@ public partial class MainWindow : Window
         var preview = SoftwareActionService.PreviewWinget(update.Id);
         if (MessageBox.Show(string.Format(LocalizationService.Text("SoftwareActionConfirmation"), LocalizationService.Text("Update"), update.Name, preview),
                 LocalizationService.Text("ConfirmAction"), MessageBoxButton.YesNo, MessageBoxImage.Warning) != MessageBoxResult.Yes) return;
+        if (!TryBeginAction(out var cancellationToken)) return;
         button.IsEnabled = false;
-        var result = await SoftwareActionService.ExecuteWingetAsync(executable, update.Id);
-        await SafeLogAsync("Software", _connectedTarget, $"Update {update.Id}", result.Success ? "Success" : "Error",
-            $"ExitCode={result.ExitCode}; {result.Details}");
-        MessageBox.Show(string.Format(LocalizationService.Text("ActionResultFormat"), result.Success ? LocalizationService.Text("ActionSucceeded") : LocalizationService.Text("ActionFailed"), result.ExitCode, result.Details),
-            LocalizationService.Text("ActionResult"), MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
-        button.IsEnabled = true;
-        if (result.Success) CheckSoftwareUpdates_Click(CheckSoftwareUpdatesButton, new RoutedEventArgs());
+        try
+        {
+            var result = await SoftwareActionService.ExecuteWingetAsync(executable, update.Id, cancellationToken);
+            await SafeLogAsync("Software", _connectedTarget, $"Update {update.Id}", result.Success ? "Success" : "Error",
+                $"ExitCode={result.ExitCode}; {result.Details}");
+            MessageBox.Show(string.Format(LocalizationService.Text("ActionResultFormat"), result.Success ? LocalizationService.Text("ActionSucceeded") : LocalizationService.Text("ActionFailed"), result.ExitCode, result.Details),
+                LocalizationService.Text("ActionResult"), MessageBoxButton.OK, result.Success ? MessageBoxImage.Information : MessageBoxImage.Error);
+            if (result.Success) CheckSoftwareUpdates_Click(CheckSoftwareUpdatesButton, new RoutedEventArgs());
+        }
+        finally
+        {
+            button.IsEnabled = true;
+            FinishAction();
+        }
+    }
+
+    private bool TryBeginAction(out CancellationToken cancellationToken)
+    {
+        if (_activeActionCancellation is not null)
+        {
+            MessageBox.Show(LocalizationService.Text("ActionAlreadyRunning"), LocalizationService.Text("ActionBlocked"),
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            cancellationToken = default;
+            return false;
+        }
+        _activeActionCancellation = new CancellationTokenSource();
+        CancelApplicationActionButton.IsEnabled = true;
+        CancelUpdateActionButton.IsEnabled = true;
+        cancellationToken = _activeActionCancellation.Token;
+        return true;
+    }
+
+    private void FinishAction()
+    {
+        _activeActionCancellation?.Dispose();
+        _activeActionCancellation = null;
+        CancelApplicationActionButton.IsEnabled = false;
+        CancelUpdateActionButton.IsEnabled = false;
+    }
+
+    private void CancelActiveAction_Click(object sender, RoutedEventArgs e)
+    {
+        _activeActionCancellation?.Cancel();
+        SoftwareActionService.CancelAll();
+    }
+
+    private async void ExportInventory_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_connectedTarget) || _applications.Count == 0)
+        {
+            MessageBox.Show(LocalizationService.Text("InventoryNotLoaded"), LocalizationService.Text("ExportInventory"),
+                MessageBoxButton.OK, MessageBoxImage.Information);
+            return;
+        }
+        var json = sender is System.Windows.Controls.Button button && button.Tag?.ToString() == "json";
+        var safeTarget = string.Concat(_connectedTarget.Select(character => Path.GetInvalidFileNameChars().Contains(character) ? '_' : character));
+        var dialog = new Microsoft.Win32.SaveFileDialog
+        {
+            FileName = $"OpenFleet-{safeTarget}-{DateTime.Now:yyyyMMdd-HHmm}",
+            DefaultExt = json ? ".json" : ".csv",
+            Filter = json ? "JSON (*.json)|*.json" : "CSV (*.csv)|*.csv"
+        };
+        if (dialog.ShowDialog(this) != true) return;
+        try
+        {
+            if (json) await InventoryExportService.ExportJsonAsync(dialog.FileName, _connectedTarget, _applications);
+            else await InventoryExportService.ExportCsvAsync(dialog.FileName, _applications);
+            MessageBox.Show(string.Format(LocalizationService.Text("ExportCompleteFormat"), dialog.FileName),
+                LocalizationService.Text("ExportInventory"), MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show(string.Format(LocalizationService.Text("ExportFailedFormat"), exception.Message),
+                LocalizationService.Text("ExportInventory"), MessageBoxButton.OK, MessageBoxImage.Error);
+        }
     }
 
     private async void PowerCommand_Click(object sender, RoutedEventArgs e)

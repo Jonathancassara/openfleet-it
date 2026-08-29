@@ -35,7 +35,7 @@
 - [x] Implement MSI repair only when Windows Installer metadata advertises it.
 - [x] Capture exit code, standard output, timeout and final status when supported by elevation mode.
 - [x] Persist a SHA-256 chained tamper-evident local action journal without secrets.
-- [ ] Add cancellation and prevent concurrent actions on the same package.
+- [x] Add cancellation and prevent concurrent actions on the same package.
 
 ## Phase 3 — Remote administration
 
@@ -51,7 +51,8 @@
 ## Phase 4 — Engineering quality
 
 - [ ] Refactor presentation logic to MVVM.
-- [ ] Add unit tests for malformed, duplicate and incomplete Registry, WMI and WinGet data.
+- [ ] Add unit tests for malformed, duplicate and incomplete Registry and WMI data.
+- [x] Add parser tests for malformed, duplicate, localized and ANSI-formatted WinGet output.
 - [ ] Add integration tests for inventory providers and command timeouts.
 - [ ] Add automated UI smoke tests for launch, navigation, localization and empty/error states.
 - [x] Add GitHub Actions build and test workflows.
@@ -74,7 +75,8 @@
 - [ ] Add clear online, offline, unauthorized, unreachable and unsupported states.
 - [ ] Show the source and collection timestamp for every inventory section.
 - [ ] Add a diagnostics view with privacy-safe connection errors and remediation guidance.
-- [ ] Export selected-device and fleet inventory to CSV and JSON.
+- [x] Export selected-device software inventory to CSV and JSON.
+- [ ] Export complete selected-device and fleet inventory to CSV and JSON.
 - [ ] Export a printable compliance summary without credentials, private tokens or recovery keys.
 - [ ] Add filters for operating system, restart pending, security status, application and driver age.
 - [ ] Add configurable health rules instead of a hard-coded synthetic health score.
@@ -84,16 +86,18 @@
 
 ## Phase 6 — Home and small-workgroup mode
 
-- [ ] Design `OpenFleet Helper` as a minimal Windows service with a documented, allow-listed API.
-- [ ] Keep the first Helper alpha strictly read-only.
+- [x] Create the `OpenFleet Helper` foundation with a documented, versioned and allow-listed API.
+- [x] Keep the first Helper alpha strictly read-only.
 - [ ] Discover Helpers only on the local private network using mDNS or an equivalent bounded mechanism.
-- [ ] Add explicit pairing with a short-lived code and approval on the remote PC.
-- [ ] Issue a unique certificate per paired device and use mutual TLS for every connection.
+- [x] Add one-time pairing with a six-digit code, five-minute expiry and bounded attempts.
+- [x] Issue a unique client certificate and require it on the inventory endpoint.
+- [ ] Add an in-app fingerprint confirmation and client-certificate import workflow.
 - [ ] Store private keys in the Windows certificate store and never store administrator passwords.
 - [ ] Restrict the Helper firewall rule to the Private profile and local subnet by default.
 - [ ] Add certificate revocation, unpairing, device reset and controller replacement workflows.
-- [ ] Add heartbeat, last-seen, agent-version and capability reporting.
-- [ ] Collect Windows/build, uptime, firewall, restart, disk, software, driver and security state.
+- [x] Add Helper health, agent-version and capability reporting.
+- [x] Collect Windows/build, uptime, firewall, restart, software and driver state through the Helper.
+- [ ] Add disk and Defender/security detail to the Helper snapshot.
 - [ ] Add low-disk-space, stale Defender signatures and missing-update alerts.
 - [ ] Add a local consent option before any future maintenance command.
 - [ ] Add rate limiting, replay protection, request expiry and complete audit records.

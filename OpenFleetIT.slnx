@@ -1,4 +1,6 @@
 <Solution>
   <Project Path="OpenFleetIT.App/OpenFleetIT.App.csproj" />
+  <Project Path="OpenFleetIT.Core/OpenFleetIT.Core.csproj" />
+  <Project Path="OpenFleetIT.Helper/OpenFleetIT.Helper.csproj" />
   <Project Path="OpenFleetIT.Tests/OpenFleetIT.Tests.csproj" />
 </Solution>
