@@ -91,7 +91,7 @@
 - [ ] Discover Helpers only on the local private network using mDNS or an equivalent bounded mechanism.
 - [x] Add one-time pairing with a six-digit code, five-minute expiry and bounded attempts.
 - [x] Issue a unique client certificate and require it on the inventory endpoint.
-- [ ] Add an in-app fingerprint confirmation and client-certificate import workflow.
+- [x] Add an in-app fingerprint verification and client-certificate import workflow.
 - [ ] Store private keys in the Windows certificate store and never store administrator passwords.
 - [ ] Restrict the Helper firewall rule to the Private profile and local subnet by default.
 - [ ] Add certificate revocation, unpairing, device reset and controller replacement workflows.

@@ -56,7 +56,7 @@ The self-contained output is written to `artifacts/OpenFleetIT-v0.1.0-alpha.1-wi
 
 The `v0.1.1-alpha.1` stabilization work adds cancellable package actions, per-package concurrency protection and CSV/JSON software inventory export. The `v0.2.0-alpha.1` Home foundation adds shared protocol contracts and an optional read-only Windows Helper secured with HTTPS, one-time pairing and client certificates.
 
-See [Home Helper alpha documentation](docs/HOME-HELPER-ALPHA.md) for its current security boundary and remaining work. The Helper is not yet installed or enabled by the desktop application.
+See [Home Helper alpha documentation](docs/HOME-HELPER-ALPHA.md) for its current security boundary and remaining work. The desktop application now includes a **Home devices** panel for fingerprint verification, pairing, certificate storage and read-only reconnection.
 
 ## Security
 

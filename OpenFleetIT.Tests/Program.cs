@@ -75,6 +75,12 @@ Test("Pairing code format", () =>
     Equal(true, OpenFleetIT.Core.PairingCode.FixedTimeEquals(code, code));
     Equal(false, OpenFleetIT.Core.PairingCode.FixedTimeEquals(code, "000000" == code ? "000001" : "000000"));
 });
+Test("Home Helper fingerprint normalization", () => Equal(
+    "00112233445566778899AABBCCDDEEFF00112233445566778899AABBCCDDEEFF",
+    HomeHelperClient.NormalizeFingerprint("00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff")));
+Test("Home Helper rejects short fingerprint", () => Throws<ArgumentException>(() =>
+    HomeHelperClient.NormalizeFingerprint("0011")));
+Test("Home Helper accepts IPv6 target", () => Equal("::1", HomeHelperClient.NormalizeHost("::1")));
 
 if (failures.Count > 0)
 {
@@ -96,4 +102,11 @@ static void Equal<T>(T expected, T actual)
 {
     if (!EqualityComparer<T>.Default.Equals(expected, actual))
         throw new InvalidOperationException($"Expected '{expected}', received '{actual}'.");
+}
+
+static void Throws<TException>(Action action) where TException : Exception
+{
+    try { action(); }
+    catch (TException) { return; }
+    throw new InvalidOperationException($"Expected {typeof(TException).Name}.");
 }

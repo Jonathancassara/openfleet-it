@@ -38,6 +38,7 @@
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Security}" Tag="&#xE72E;" Click="OpenSecurity_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Drivers}" Tag="&#xE950;" Click="OpenDrivers_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource Commands}" Tag="&#xE756;" Click="OpenCommands_Click"/>
+                        <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource HomeDevices}" Tag="&#xE80F;" Click="OpenHomeDevices_Click"/>
                         <TextBlock Text="{DynamicResource Administration}" FontSize="10" FontWeight="SemiBold" Foreground="#77819A" Margin="14,24,0,9"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource ItFleet}" Tag="&#xE950;" Click="OpenFleetScan_Click"/>
                         <RadioButton Style="{StaticResource NavButton}" Content="{DynamicResource ActionLog}" Tag="&#xE81C;" Click="OpenActionLog_Click"/>
@@ -194,6 +195,7 @@
                     </Grid>
                     <local:FleetScanWindow x:Name="FleetPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0"/>
                     <local:SettingsWindow x:Name="SettingsPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0"/>
+                    <local:HomeHelperPanel x:Name="HomeHelperPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0"/>
                     <Grid x:Name="UpdatesPanel" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Margin="0,22,0,0">
                         <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
                         <Grid>
