@@ -92,8 +92,10 @@
 - [x] Add one-time pairing with a six-digit code, five-minute expiry and bounded attempts.
 - [x] Issue a unique client certificate and require it on the inventory endpoint.
 - [x] Add an in-app fingerprint verification and client-certificate import workflow.
-- [ ] Store private keys in the Windows certificate store and never store administrator passwords.
-- [ ] Restrict the Helper firewall rule to the Private profile and local subnet by default.
+- [x] Store private keys in the Windows certificate store and never store administrator passwords.
+- [x] Provide a Windows service installer and clean service/binary/firewall uninstaller.
+- [x] Restrict the Helper firewall rule to the Private profile and local subnet by default.
+- [ ] Validate service installation, upgrade and removal on disposable Windows 11 VMs.
 - [ ] Add certificate revocation, unpairing, device reset and controller replacement workflows.
 - [x] Add Helper health, agent-version and capability reporting.
 - [x] Collect Windows/build, uptime, firewall, restart, software and driver state through the Helper.

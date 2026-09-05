@@ -13,6 +13,9 @@ public static class HomeProtocol
 public sealed record HelperHealth(string ProtocolVersion, string HelperVersion, string DeviceName,
     DateTimeOffset ServerTimeUtc, IReadOnlyList<string> Capabilities);
 
+public sealed record LocalPairingInfo(string DeviceName, string PairingCode, string ServerCertificateSha256,
+    DateTimeOffset ExpiresAtUtc);
+
 public sealed record PairingRequest(string Code, string ControllerName);
 
 public sealed record PairingResponse(string DeviceId, string DeviceName, string ClientCertificatePfx,

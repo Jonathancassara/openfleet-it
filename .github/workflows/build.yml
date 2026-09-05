@@ -39,6 +39,7 @@ jobs:
           $helperHash = (Get-FileHash "$helperPath/OpenFleetIT.Helper.exe" -Algorithm SHA256).Hash
           "$helperHash  OpenFleetIT.Helper.exe" | Set-Content "$helperPath/checksums.txt" -Encoding ascii
           Copy-Item docs/HOME-HELPER-ALPHA.md,LICENSE.md,SECURITY.md "$helperPath/"
+          Copy-Item installer/Install-OpenFleetHelper.ps1,installer/Uninstall-OpenFleetHelper.ps1 "$helperPath/"
       - uses: actions/upload-artifact@v7
         with:
           name: OpenFleetIT-v0.1.1-alpha.1-win-x64
