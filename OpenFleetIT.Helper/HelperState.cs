@@ -55,6 +55,9 @@ public sealed class HelperState
     public HelperHealth Health() => new(HomeProtocol.Version, HelperVersion, Environment.MachineName,
         DateTimeOffset.UtcNow, ["inventory.windows", "inventory.software", "inventory.drivers"]);
 
+    public LocalPairingInfo LocalPairingInfo() => new(Environment.MachineName, PairingCode,
+        ServerFingerprint, PairingExpiresAtUtc);
+
     public IResult Pair(PairingRequest request)
     {
         lock (_gate)

@@ -58,6 +58,8 @@ The `v0.1.1-alpha.1` stabilization work adds cancellable package actions, per-pa
 
 See [Home Helper alpha documentation](docs/HOME-HELPER-ALPHA.md) for its current security boundary and remaining work. The desktop application now includes a **Home devices** panel for fingerprint verification, pairing, certificate storage and read-only reconnection.
 
+The Helper artifact includes PowerShell installation and removal scripts. Installation registers an automatic Windows service under `LocalService` and a program-scoped inbound firewall rule limited to the Private profile, the local subnet and TCP 47831.
+
 ## Security
 
 Read [SECURITY.md](SECURITY.md) before enabling remote administration. OpenFleet IT never bundles PsExec and does not request or store remote passwords.
